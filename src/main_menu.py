@@ -21,9 +21,6 @@ class MainMenu:
         self.userInput = False
         self.FONTwaitingForUserInput = createFont(constants.white, 40, fontLocation="../assets/CourierPrimeCode-Regular.ttf")
 
-        # PLAY SCREEN:
-
-
     def run(self):
         while True:
             self.fpsClock.tick(60)
