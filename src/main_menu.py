@@ -16,7 +16,7 @@ class MainMenu:
 
         # LOADING SCREEN:
         self.loadingImage = pygame.image.load("../assets/valorantLoading.png").convert_alpha()
-        self.loadingImage = pygame.transform.smoothscale(self.loadingImage, [width, height])
+        #self.loadingImage = pygame.transform.smoothscale(self.loadingImage, [width, height])
         self.loadingImageALPHA = self.loadingImage.get_alpha()
         self.userInput = False
         self.FONTwaitingForUserInput = createFont(constants.white, 40, fontLocation="../assets/CourierPrimeCode-Regular.ttf")
@@ -58,10 +58,11 @@ class MainMenu:
                                 self.inPlay = True
 
 
+            if self.userInput and self.loadingImageALPHA < 1:
+                self.display.fill(constants.black)
+            else:
+                self.display.fill(constants.logoColor)
 
-            self.display.fill(constants.black)
-
-            self.display.blit(self.loadingImage, [0, 0])
             if self.userInput:
                 if self.loadingImageALPHA > 0:
                     self.loadingImageALPHA -= 2
@@ -83,6 +84,10 @@ class MainMenu:
 
 
             # RENDERING
+            loadingImgRect = self.loadingImage.get_rect()
+            loadingImgRect.centerx = self.display.get_rect().centerx
+            self.display.blit(self.loadingImage, loadingImgRect)
+
             if not self.userInput:
                 self.FONTwaitingForUserInput.render_to(self.display, self.waitingUIRect, "Waiting for User Input...")
 

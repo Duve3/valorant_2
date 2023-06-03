@@ -12,6 +12,7 @@ gray = (150, 150, 150)
 whiteGray = (200, 200, 200)
 yellow = (255, 255, 0)
 orange = (255, 150, 0)
+logoColor = (15, 25, 35)
 
 colorList = [white, black, red, grayRed, green, grayGreen, blue, gray, whiteGray, yellow, orange]
 
