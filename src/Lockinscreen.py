@@ -1,5 +1,7 @@
 import pygame
 from button import Button
+from util import createFont
+import constants
 
 pygame.init()
 lockinscreen = pygame.display.set_mode([400, 400])
@@ -8,7 +10,7 @@ buttons = []
 listofcordforbutton = []#i could make agents a llist of dic and have the cords attached to the valorant agents
 count = 0
 for x in agents:
-    button = Button("Blue", listofcordforbutton[count], listofcordforbutton[count], 20, 20, x)
+    button = Button("Blue", listofcordforbutton[count], listofcordforbutton[count], 20, 20, createFont(constants.white, 20, fontLocation="../assets/CourierPrimeCode-Regular.ttf"), x)
     count += 1
     buttons.append(button)
 

@@ -2,7 +2,8 @@ import pygame
 
 
 class Button:
-    def __init__(self, color, x, y, width, height, text=''):
+    def __init__(self, color, x, y, width, height, font, text=''):
+        self.font = font
         self.color = color
         self.x = x
         self.y = y
@@ -18,8 +19,8 @@ class Button:
         pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.height), 0)
 
         if self.words != '':
-            font = pygame.font.SysFont('', 60)  # idk what text to do
-            text = font.render(self.words, True, (0, 0, 0))
+            # font = pygame.font.SysFont('', 60)  # idk what text to do  -- replaced with the font requirement on creation
+            text = self.font.render(self.words, True, (0, 0, 0))
             win.blit(text, (self.x + (self.width / 2 - text.get_width() / 2), self.y + (self.height / 2 - text.get_height() / 2)))
 
     def isOver(self, pos):
