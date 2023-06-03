@@ -15,10 +15,12 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    mouse = pygame.mouse.get_pos()
-    for button in buttons:
-        button.draw(lockinscreen)
-        if button.isOver(mouse) and event.type == pygame.MOUSEBUTTONDOWN:
+        # also tabbed in the following code because it seems like it should be tabbed in (using event.type)
+        mouse = pygame.mouse.get_pos()
+        for button in buttons:
+            button.draw(lockinscreen)
+            if button.isOver(mouse) and event.type == pygame.MOUSEBUTTONDOWN:
+                pass  # someone just left this empty so im turning it into a pass
 
     pygame.display.flip()
 
