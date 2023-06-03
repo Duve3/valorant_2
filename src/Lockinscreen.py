@@ -5,8 +5,11 @@ pygame.init()
 lockinscreen = pygame.display.set_mode([400, 400])
 agents = ["jett"]
 buttons = []
+listofcordforbutton = []#i could make agents a llist of dic and have the cords attached to the valorant agents
+count = 0
 for x in agents:
-    button = Button("Blue", 20, 20, 20, 20, x)
+    button = Button("Blue", listofcordforbutton[count], listofcordforbutton[count], 20, 20, x)
+    count += 1
     buttons.append(button)
 
 running = True
@@ -20,7 +23,8 @@ while running:
         for button in buttons:
             button.draw(lockinscreen)
             if button.isOver(mouse) and event.type == pygame.MOUSEBUTTONDOWN:
-                pass  # someone just left this empty so im turning it into a pass
+                agentchosen = button[5]
+                
 
     pygame.display.flip()
 
