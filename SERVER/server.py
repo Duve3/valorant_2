@@ -26,6 +26,7 @@ def handle(conn, addr):
         try:
             data = conn.recv(header)
             msg = data.decode(encoding)
+            print(msg)
 
         except Exception as e:
             print(f"FATAL ERROR:\n\t{str(e)}")

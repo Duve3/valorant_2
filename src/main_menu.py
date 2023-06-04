@@ -16,7 +16,6 @@ class MainMenu:
 
         # LOADING SCREEN:
         self.loadingImage = pygame.image.load("../assets/valorantLoading.png").convert_alpha()
-        #self.loadingImage = pygame.transform.smoothscale(self.loadingImage, [width, height])
         self.loadingImageALPHA = self.loadingImage.get_alpha()
         self.userInput = False
         self.FONTwaitingForUserInput = createFont(constants.white, 40, fontLocation="../assets/CourierPrimeCode-Regular.ttf")
@@ -36,14 +35,14 @@ class MainMenu:
                 if event.type == pygame.QUIT:
                     sys.exit()  # exit but better
 
-                elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:  # detect player input
+                elif self.userInput is False and event.type == pygame.KEYDOWN or self.userInput is False and event.type == pygame.MOUSEBUTTONDOWN:  # detect player input
                     self.userInput = True
 
                 elif event.type == pygame.MOUSEMOTION:
                     mx, my = pygame.mouse.get_pos()
                     if self.userInput:
                         if self.playRect is not None:
-                            if self.playRect.collidepoint(mx, my):
+                            if self.playRect.collidepoint(mx, my) and self.inPlay is False:
                                 self.playColor = constants.lightBlue
                                 self.playSize = 70
                             else:
@@ -53,10 +52,11 @@ class MainMenu:
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     mx, my = pygame.mouse.get_pos()
                     if self.userInput:
+                        print("triggered")
                         if self.playRect.collidepoint(mx, my):
                             if self.inPlay is False:
-                                self.inPlay = True
 
+                                self.inPlay = True
 
             if self.userInput and self.loadingImageALPHA < 1:
                 self.display.fill(constants.black)
@@ -68,10 +68,9 @@ class MainMenu:
                     self.loadingImageALPHA -= 2
                     self.loadingImage.set_alpha(self.loadingImageALPHA)
             else:
-                self.waitingUIRect = self.FONTwaitingForUserInput.get_rect("Waiting for User Input...", size=40)
+                self.waitingUIRect = self.FONTwaitingForUserInput.get_rect("Click anywhere to begin", size=40)
                 self.waitingUIRect.centerx = self.display.get_rect().centerx
-                self.waitingUIRect.y = 50
-                self.FONTwaitingForUserInput.render_to(self.display, self.waitingUIRect, "Waiting for User Input...")
+                self.waitingUIRect.y = 650
 
             if self.userInput:
                 self.playRect = self.FONTtopText.get_rect("PLAY", size=self.playSize)
@@ -89,12 +88,12 @@ class MainMenu:
             self.display.blit(self.loadingImage, loadingImgRect)
 
             if not self.userInput:
-                self.FONTwaitingForUserInput.render_to(self.display, self.waitingUIRect, "Waiting for User Input...")
+                self.FONTwaitingForUserInput.render_to(self.display, self.waitingUIRect, "Click anywhere to begin")
 
             if self.userInput:
                 self.FONTtopText.render_to(self.display, self.playRect, "PLAY", fgcolor=self.playColor,
                                            size=self.playSize)
 
             pygame.display.flip()
-
-            print(f"{self.inPlay = }")
+            if self.inPlay is True:
+                print(f"{self.inPlay = }")
