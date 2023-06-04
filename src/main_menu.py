@@ -26,7 +26,7 @@ class MainMenu:
         self.playSize = 60
         self.playRect = None
         self.playColor = constants.white
-        self.inPlay = False  # TODO: inPlay is not being set when mouse click on play menu
+        self.inPlay = False
 
     def run(self):
         while True:
@@ -52,7 +52,6 @@ class MainMenu:
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     mx, my = pygame.mouse.get_pos()
                     if self.userInput:
-                        print("triggered")
                         if self.playRect.collidepoint(mx, my):
                             if self.inPlay is False:
 
@@ -95,5 +94,3 @@ class MainMenu:
                                            size=self.playSize)
 
             pygame.display.flip()
-            if self.inPlay is True:
-                print(f"{self.inPlay = }")
