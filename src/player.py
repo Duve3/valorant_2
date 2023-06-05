@@ -1,3 +1,5 @@
+import pygame
+
 class world:
     def __init__(self, blocklist):
         self.blocklist = blocklist
