@@ -1,3 +1,5 @@
+import sys
+
 import pygame
 from button import Button
 from util import createFont
@@ -25,12 +27,36 @@ while running:
         for button in buttons:
             button.draw(lockinscreen)
             if button.isOver(mouse) and event.type == pygame.MOUSEBUTTONDOWN:
-                agentchosen = button[5]
+                agentchosen = buttons[5]
                 
 
     pygame.display.flip()
 
 pygame.quit()
+
+
+# ^^^^ above code is original, but isn't designed well heres some properly designed code:
+
+class LockInScreen:
+    """
+    LockInScreen:
+    The screen for locking in
+    """
+    def __init__(self, screen: pygame.Surface, fpsClock: pygame.time.Clock, width: int, height: int):
+        self.res = (width, height)
+        self.display = screen
+        self.fpsClock = fpsClock
+
+        self.agents = {"Jett": Button(constants.blue, 50, 50, 20, 20, createFont(constants.white, 20, fontLocation="../assets/CourierPrimeCode-Regular.ttf"), "Jett")}
+
+    def run(self):
+        while True:
+            self.fpsClock.tick(60)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()  # exit but better
+
+            # actual game code here:
   
   
   

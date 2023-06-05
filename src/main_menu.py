@@ -76,9 +76,9 @@ class MainMenu:
                 self.playRect.centerx = self.display.get_rect().centerx
                 self.playRect.y = 30
 
-
             if self.inPlay:
                 self.playColor = constants.gray
+                self.playSize = 70
 
 
             # RENDERING
