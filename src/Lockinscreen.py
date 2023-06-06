@@ -9,10 +9,11 @@ pygame.init()
 lockinscreen = pygame.display.set_mode([400, 400])
 agents = ["jett"]
 buttons = []
-listofcordforbutton = []#i could make agents a llist of dic and have the cords attached to the valorant agents
+listofcordforbutton = []  # I could make agents a llist of dic and have the cords attached to the valorant agents
 count = 0
 for x in agents:
-    button = Button("Blue", listofcordforbutton[count], listofcordforbutton[count], 20, 20, createFont(constants.white, 20, fontLocation="../assets/CourierPrimeCode-Regular.ttf"), x)
+    button = Button("Blue", listofcordforbutton[count], listofcordforbutton[count], 20, 20,
+                    createFont(constants.white, 20, fontLocation="../assets/CourierPrimeCode-Regular.ttf"), x)
     count += 1
     buttons.append(button)
 
@@ -28,26 +29,28 @@ while running:
             button.draw(lockinscreen)
             if button.isOver(mouse) and event.type == pygame.MOUSEBUTTONDOWN:
                 agentchosen = buttons[5]
-                
 
     pygame.display.flip()
 
 pygame.quit()
 
 
-# ^^^^ above code is original, but isn't designed well heres some properly designed code:
+# ^^^^ above code is original, but isn't designed well here's some properly designed code:
 
 class LockInScreen:
     """
     LockInScreen:
     The screen for locking in
     """
+
     def __init__(self, screen: pygame.Surface, fpsClock: pygame.time.Clock, width: int, height: int):
         self.res = (width, height)
         self.display = screen
         self.fpsClock = fpsClock
 
-        self.agents = {"Jett": Button(constants.blue, 50, 50, 20, 20, createFont(constants.white, 20, fontLocation="../assets/CourierPrimeCode-Regular.ttf"), "Jett")}
+        self.agents = {"Jett": Button(constants.blue, 50, 50, 20, 20, createFont(constants.white, 20,
+                                                                                 fontLocation="../assets/CourierPrimeCode-Regular.ttf"),
+                                      "Jett")}
 
     def run(self):
         while True:
@@ -57,9 +60,3 @@ class LockInScreen:
                     sys.exit()  # exit but better
 
             # actual game code here:
-  
-  
-  
-  
-  
-  

@@ -18,7 +18,8 @@ class MainMenu:
         self.loadingImage = pygame.image.load("../assets/valorantLoading.png").convert_alpha()
         self.loadingImageALPHA = self.loadingImage.get_alpha()
         self.userInput = False
-        self.FONTwaitingForUserInput = createFont(constants.white, 40, fontLocation="../assets/CourierPrimeCode-Regular.ttf")
+        self.FONTwaitingForUserInput = createFont(constants.white, 40,
+                                                  fontLocation="../assets/CourierPrimeCode-Regular.ttf")
         self.waitingUIRect = None
 
         # MAIN MENU
@@ -54,7 +55,6 @@ class MainMenu:
                     if self.userInput:
                         if self.playRect.collidepoint(mx, my):
                             if self.inPlay is False:
-
                                 self.inPlay = True
 
             if self.userInput and self.loadingImageALPHA < 1:
@@ -79,7 +79,6 @@ class MainMenu:
             if self.inPlay:
                 self.playColor = constants.gray
                 self.playSize = 70
-
 
             # RENDERING
             loadingImgRect = self.loadingImage.get_rect()
