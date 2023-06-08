@@ -7,3 +7,5 @@ def createFont(color, size, *, fontLocation=courierFont):
     font.size = size
     font.fgcolor = color  # NOQA:TYPO
     return font
+
+

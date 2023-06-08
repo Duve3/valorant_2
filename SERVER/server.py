@@ -42,4 +42,4 @@ def listen():
         thread = threading.Thread(target=handle, args=(conn, addr), daemon=True)
         thread.start()
         print(f"There is currently: {threading.activeCount() - 1} clients!")
-        thread.join(10)
+        thread.join()  # removed timeout for testing purposes
