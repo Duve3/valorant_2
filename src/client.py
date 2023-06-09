@@ -1,4 +1,6 @@
 import socket
+import json
+from player import Player
 
 HEADER = 2048
 # override in case of different address or tcp tunnels
@@ -7,12 +9,16 @@ PORT = 5000
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
 DISCONNECT_RESPONSE = "DISCONNECTED"
+PlayerData_MSG = "PLAYERDATA:"
+PlayerData_RES = "RECEIVED"
+ReqData_MSG = "REQDATA"
+
 ADDR = (SERVER, PORT)
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 
 
-def send(msg):
+def _send(msg):
     message = msg.encode(FORMAT)
     msg_length = len(message)
     send_length = str(msg_length).encode(FORMAT)
@@ -26,10 +32,24 @@ def send(msg):
         return response
 
 
-msg2send = input("What to send?: ")
-while msg2send != ":qa":
-    print(f"Result: {send(msg2send)}")
-    msg2send = input("What to send?: ")
+def plrDataSend(plr: Player, pid: int):
+    # ex: {"health": 12, "dps": 10682, "targetID": 27}
+    data = {
+        "id": pid,
+        "x": plr.x,
+        "y": plr.y,
+        "model": plr.currentModel,
+        "agent": plr.agent
+    }
 
-print("Exiting...")
-send(DISCONNECT_MESSAGE)
+    res = _send(f"{PlayerData_MSG}{data}")
+
+    if res != PlayerData_RES:
+        print("WARNING: FAILED TO RECEIVE PROPER RESPONSE FOR PLAYER DATA SEND")
+
+
+def plrDataGet():
+    plrData = _send(ReqData_MSG)
+
+    return json.loads(plrData)
+

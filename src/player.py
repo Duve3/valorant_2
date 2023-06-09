@@ -1,4 +1,6 @@
-import pygame
+if __name__ == "__main__":
+    import pygame
+
 
 class world:
     def __init__(self, blocklist):
@@ -14,3 +16,13 @@ class world:
     def movement(self, dx, dy):
         self.x += dx
         self.y += dy
+
+
+class Player:
+    def __init__(self, x, y, models):
+        self.x = x
+        self.y = y
+        self.models = models
+        self.agent = ""
+        self.currentModel = 0
+        self.currentWeapon = None  # add later

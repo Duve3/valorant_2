@@ -27,11 +27,11 @@ playerData = {}
 
 def playerDataHandler(givenData: str):
     global playerData
-    assert(isinstance(givenData, str), "Not given string data!")
 
-    givenData.replace(PlayerData_MSG, "")
-    givenData.replace("'", '"')  # replace '' to "" since ' isn't allowed in json
+    givenData = givenData.replace(PlayerData_MSG, "")
+    givenData = givenData.replace("'", '"')  # replace '' to "" since ' isn't allowed in json
 
+    print(f"On FINAL for loads, data:\n\t{givenData}")
     Dictionary = json.loads(givenData)  # load the playerData into json format (dictionary)
     playerData = Dictionary
     return playerData
@@ -42,30 +42,23 @@ def handle(conn: socket.socket, addr):
     plrData = {}
 
     while True:
-        try:
+        msg_length = conn.recv(header).decode(encoding)
+        if msg_length:
+            msg_length = int(msg_length)
+            msg = conn.recv(msg_length).decode(encoding)
+            print(f"[{addr}] - {msg} with length: {msg_length}")
+            if msg == disconnect_msg:
+                conn.send(disconnect_res.encode(encoding))
 
-            msg_length = conn.recv(header).decode(encoding)
-            if msg_length:
-                msg_length = int(msg_length)
-                msg = conn.recv(msg_length).decode(encoding)
-                print(f"[{addr}] - {msg} with length: {msg_length}")
-                if msg == disconnect_msg:
-                    conn.send(disconnect_res.encode(encoding))
+            elif msg.startswith(PlayerData_MSG):
+                plrData = playerDataHandler(msg)
+                conn.send(PlayerData_RES.encode(encoding))
 
-                elif msg == PlayerData_MSG:
-                    plrData = playerDataHandler(msg)
-                    conn.send(PlayerData_RES.encode(encoding))
+            elif msg == ReqData_MSG:
+                conn.send(str(plrData).encode(encoding))
 
-                elif msg == ReqData_MSG:
-                    conn.send(str(plrData).encode(encoding))
-
-
-
+            else:
                 conn.send(msg.encode(encoding))
-
-
-        except Exception as e:
-            print(f"FATAL ERROR:\n\t{str(e)}")
 
 
 def listen():
