@@ -2,7 +2,8 @@ if __name__ == "__main__":
     import pygame
 
 
-class world:
+# very lost on what this class does
+class World:
     def __init__(self, blocklist):
         self.blocklist = blocklist
         self.x = 400
@@ -10,7 +11,7 @@ class world:
     
     def checkup(self):
         for block in self.blocklist:
-            if self.x + 500 > block["x"] and self.x - 500 < block["x"] and self.y + 500 > block["y"] and self.y - 500 < block["y"]: #onley draws things that you see
+            if self.x + 500 > block["x"] > self.x - 500 and self.y + 500 > block["y"] > self.y - 500:  # only draws things that you see
                 pygame.draw.rect(block["screen"], block["color"], pygame.Rect(block["x"]-self.x, block["y"]-self.y, block["width"], block["height"]))
     
     def movement(self, dx, dy):
