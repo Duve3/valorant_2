@@ -7,7 +7,7 @@ class World:
     def __init__(self, blocklist):
         self.blocklist = blocklist
         self.x = 400
-        self.y = 400 # #location in the world
+        self.y = 400 # #location in the world This world is not shown on  screen it is location in space
     
     def checkup(self):
         for block in self.blocklist:
