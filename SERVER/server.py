@@ -1,6 +1,5 @@
 import socket
 import threading
-import sys
 import json
 
 server = ""
@@ -14,6 +13,8 @@ PlayerData_RES = "RECEIVED"
 ReqData_MSG = "REQDATA"
 NewID_MSG = "GIVEID"
 NewID_RES = "ID:"
+SelfData_MSG = "SELFDATA:"
+SelfData_RES = "DATA:"
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -37,6 +38,12 @@ def playerDataHandler(givenData: str):
     Dictionary = json.loads(givenData)  # load the playerData into json format (dictionary)
     playerData = Dictionary
     return playerData
+
+
+def returnSelfData(pid: int):
+    global playerData
+
+    return playerData[pid]
 
 
 def idHandler():
@@ -63,6 +70,14 @@ def handle(conn: socket.socket, addr):
 
             elif msg == ReqData_MSG:
                 conn.send(str(plrData).encode(encoding))
+
+            elif msg == NewID_MSG:
+                newID = idHandler()
+                conn.send(str(newID).encode(encoding))
+
+            elif msg.startswith(SelfData_MSG):
+                selfData = returnSelfData(int(msg.replace(SelfData_MSG, "")))
+                conn.send(str(selfData).encode(encoding))
 
             else:
                 conn.send(msg.encode(encoding))

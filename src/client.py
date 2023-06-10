@@ -14,13 +14,15 @@ PlayerData_RES = "RECEIVED"
 ReqData_MSG = "REQDATA"
 NewID_MSG = "GIVEID"
 NewID_RES = "ID:"
+SelfData_MSG = "SELFDATA:"
+SelfData_RES = "DATA:"
 
 ADDR = (SERVER, PORT)  # NOQA:DUPCODEFRAG
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 
 
-def _send(msg):
+def __send(msg):
     message = msg.encode(FORMAT)
     msg_length = len(message)
     send_length = str(msg_length).encode(FORMAT)
@@ -44,20 +46,26 @@ def plrDataSend(plr: Player, pid: int):
         "agent": plr.agent
     }
 
-    res = _send(f"{PlayerData_MSG}{data}")
+    res = __send(f"{PlayerData_MSG}{data}")
 
     if res != PlayerData_RES:
         print("WARNING: FAILED TO RECEIVE PROPER RESPONSE FOR PLAYER DATA SEND")
 
 
 def plrDataGet():
-    plrData = _send(ReqData_MSG)
+    plrData = __send(ReqData_MSG)
 
     return json.loads(plrData)
 
 
+def getSelfData(pid: int):
+    selfData = __send(f"{SelfData_MSG}{pid}")
+
+    return json.loads(selfData.replace(f"{SelfData_RES}", ""))
+
+
 def getID():
-    pid = _send(NewID_MSG)
+    pid = __send(NewID_MSG)
 
     return pid.replace(f"{NewID_RES}", "")
 
