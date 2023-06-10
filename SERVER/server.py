@@ -12,6 +12,8 @@ disconnect_res = "DISCONNECTED"
 PlayerData_MSG = "PLAYERDATA:"
 PlayerData_RES = "RECEIVED"
 ReqData_MSG = "REQDATA"
+NewID_MSG = "GIVEID"
+NewID_RES = "ID:"
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -37,8 +39,13 @@ def playerDataHandler(givenData: str):
     return playerData
 
 
-def handle(conn: socket.socket, addr):
+def idHandler():
     global idCounter
+    idCounter += 1
+    return idCounter - 1
+
+
+def handle(conn: socket.socket, addr):
     plrData = {}
 
     while True:

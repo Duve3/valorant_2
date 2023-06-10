@@ -12,8 +12,10 @@ DISCONNECT_RESPONSE = "DISCONNECTED"
 PlayerData_MSG = "PLAYERDATA:"
 PlayerData_RES = "RECEIVED"
 ReqData_MSG = "REQDATA"
+NewID_MSG = "GIVEID"
+NewID_RES = "ID:"
 
-ADDR = (SERVER, PORT)
+ADDR = (SERVER, PORT)  # NOQA:DUPCODEFRAG
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 
@@ -52,4 +54,10 @@ def plrDataGet():
     plrData = _send(ReqData_MSG)
 
     return json.loads(plrData)
+
+
+def getID():
+    pid = _send(NewID_MSG)
+
+    return pid.replace(f"{NewID_RES}", "")
 
