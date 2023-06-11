@@ -33,12 +33,18 @@ class MainMenu:
             point[1] += self.PlayPolygonOffset[1]
 
         self.playColor = constants.white
+        self.PlayPolygonColor = constants.CustomRed
         self.inPlay = False
 
         # PLAY MENU
         self.joinRect = None
         self.FONTjoinButton = createFont(constants.white, 40, fontLocation="../assets/CourierPrimeCode-Regular.ttf")
-        self.joinColor = constants.red
+        self.joinColorRect = constants.CustomRed
+        self.joinColor = constants.white
+        self.joinPadw = 160
+        self.joinPadh = 40
+        self.joinPadx = 80
+        self.joinPady = 20
 
 
     def run(self):
@@ -71,7 +77,7 @@ class MainMenu:
 
             if self.userInput:
                 if self.loadingImageALPHA > 0:
-                    self.loadingImageALPHA -= 2
+                    self.loadingImageALPHA -= 3
                     self.loadingImage.set_alpha(self.loadingImageALPHA)
             else:
                 self.waitingUIRect = self.FONTwaitingForUserInput.get_rect("Click anywhere to begin", size=40)
@@ -84,11 +90,16 @@ class MainMenu:
                 self.playRect.y = 20
 
             if self.inPlay:
-                self.playColor = constants.gray
+                self.playColor = constants.white
+                self.PlayPolygonColor = constants.gray
                 self.playSize = 70
                 self.playRect = self.FONTtopText.get_rect("PLAY", size=self.playSize)
                 self.playRect.centerx = self.display.get_rect().centerx
                 self.playRect.y = 20
+
+                self.joinRect = self.FONTjoinButton.get_rect("JOIN", size=40)
+                self.joinRect.centerx = self.display.get_rect().centerx
+                self.joinRect.y = 650
 
             # RENDERING
             if self.userInput and self.loadingImageALPHA < 1:
@@ -107,8 +118,13 @@ class MainMenu:
                 self.FONTwaitingForUserInput.render_to(self.display, self.waitingUIRect, "Click anywhere to begin")
 
             if self.userInput:
-                pygame.draw.polygon(self.display, constants.CustomRed, self.PolygonPlayPOINTS)
+                pygame.draw.polygon(self.display, self.PlayPolygonColor, self.PolygonPlayPOINTS)
                 self.FONTtopText.render_to(self.display, self.playRect, "PLAY", fgcolor=self.playColor,
                                            size=self.playSize)
+
+                if self.inPlay:
+                    customRect = pygame.Rect(self.joinRect.x - self.joinPadx, self.joinRect.y - self.joinPady, self.joinRect.width + self.joinPadw, self.joinRect.height + self.joinPadh)
+                    pygame.draw.rect(self.display, self.joinColorRect, customRect)
+                    self.FONTjoinButton.render_to(self.display, self.joinRect, "JOIN", fgcolor=self.joinColor, size=40)
 
             pygame.display.flip()

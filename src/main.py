@@ -5,7 +5,8 @@ import ctypes
 
 
 def main():  # the main game
-    myappid = u'alterragames.valorant2d.testing.1'  # arbitrary string
+    # setting the logo for the game
+    myappid = u'alterragames.valorant2d.testing.main'  # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
     pygame.init()
@@ -17,8 +18,6 @@ def main():  # the main game
     window = pygame.display.set_mode(RES)
     fpsClock = pygame.time.Clock()
     mm = MainMenu(window=window, fpsClock=fpsClock, width=RES[0], height=RES[1])
-
-
 
 
     MainMenu.run(mm)
