@@ -13,6 +13,7 @@ whiteGray = (200, 200, 200)
 yellow = (255, 255, 0)
 orange = (255, 150, 0)
 logoColor = (15, 25, 35)
+CustomRed = (255, 70, 82)
 
 colorList = [white, black, red, grayRed, green, grayGreen, blue, gray, whiteGray, yellow, orange]
 

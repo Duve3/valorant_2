@@ -26,8 +26,20 @@ class MainMenu:
         self.FONTtopText = createFont(constants.white, 60, fontLocation="../assets/MonomaniacOne-Regular.ttf")
         self.playSize = 60
         self.playRect = None
+        self.PolygonPlayPOINTS = [[0, 0], [50, 80], [250, 80], [300, 0]]
+        self.PlayPolygonOffset = (self.display.get_rect().centerx - self.PolygonPlayPOINTS[len(self.PolygonPlayPOINTS) - 1][0]/2, 0)
+        for point in self.PolygonPlayPOINTS:
+            point[0] += self.PlayPolygonOffset[0]
+            point[1] += self.PlayPolygonOffset[1]
+
         self.playColor = constants.white
         self.inPlay = False
+
+        # PLAY MENU
+        self.joinRect = None
+        self.FONTjoinButton = createFont(constants.white, 40, fontLocation="../assets/CourierPrimeCode-Regular.ttf")
+        self.joinColor = constants.red
+
 
     def run(self):
         while True:
@@ -57,11 +69,6 @@ class MainMenu:
                             if self.inPlay is False:
                                 self.inPlay = True
 
-            if self.userInput and self.loadingImageALPHA < 1:
-                self.display.fill(constants.black)
-            else:
-                self.display.fill(constants.logoColor)
-
             if self.userInput:
                 if self.loadingImageALPHA > 0:
                     self.loadingImageALPHA -= 2
@@ -74,13 +81,24 @@ class MainMenu:
             if self.userInput:
                 self.playRect = self.FONTtopText.get_rect("PLAY", size=self.playSize)
                 self.playRect.centerx = self.display.get_rect().centerx
-                self.playRect.y = 30
+                self.playRect.y = 20
 
             if self.inPlay:
                 self.playColor = constants.gray
                 self.playSize = 70
+                self.playRect = self.FONTtopText.get_rect("PLAY", size=self.playSize)
+                self.playRect.centerx = self.display.get_rect().centerx
+                self.playRect.y = 20
 
             # RENDERING
+            if self.userInput and self.loadingImageALPHA < 1:
+                self.display.fill(constants.black)
+            else:
+                self.display.fill(constants.logoColor)
+
+            if self.inPlay:
+                self.display.fill(constants.logoColor)
+
             loadingImgRect = self.loadingImage.get_rect()
             loadingImgRect.centerx = self.display.get_rect().centerx
             self.display.blit(self.loadingImage, loadingImgRect)
@@ -89,6 +107,7 @@ class MainMenu:
                 self.FONTwaitingForUserInput.render_to(self.display, self.waitingUIRect, "Click anywhere to begin")
 
             if self.userInput:
+                pygame.draw.polygon(self.display, constants.CustomRed, self.PolygonPlayPOINTS)
                 self.FONTtopText.render_to(self.display, self.playRect, "PLAY", fgcolor=self.playColor,
                                            size=self.playSize)
 
