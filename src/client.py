@@ -16,6 +16,8 @@ NewID_MSG = "GIVEID"
 NewID_RES = "ID:"
 SelfData_MSG = "SELFDATA:"
 SelfData_RES = "DATA:"
+Joining_MSG = "JOINING:"
+Joining_RES = "JOINING"
 
 ADDR = (SERVER, PORT)  # NOQA:DUPCODEFRAG
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

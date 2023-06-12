@@ -41,10 +41,15 @@ class MainMenu:
         self.FONTjoinButton = createFont(constants.white, 40, fontLocation="../assets/CourierPrimeCode-Regular.ttf")
         self.joinColorRect = constants.CustomRed
         self.joinColor = constants.white
+        self.joinText = "JOIN"
         self.joinPadw = 160
         self.joinPadh = 40
         self.joinPadx = 80
         self.joinPady = 20
+        self.customJoinRect = None
+        self.joining = False
+
+
 
 
     def run(self):
@@ -68,12 +73,30 @@ class MainMenu:
                                 self.playColor = constants.white
                                 self.playSize = 60
 
+                    if self.inPlay:
+                        if self.customJoinRect is not None and self.joining is False:
+                            if self.customJoinRect.collidepoint(mx, my):
+                                self.joinColorRect = constants.CustomRed.lighten(50)
+                            else:
+                                self.joinColorRect = constants.CustomRed
+
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     mx, my = pygame.mouse.get_pos()
                     if self.userInput:
+
                         if self.playRect.collidepoint(mx, my):
                             if self.inPlay is False:
                                 self.inPlay = True
+
+                    if self.inPlay:
+                        if self.customJoinRect is not None:
+                            if self.customJoinRect.collidepoint(mx, my) and self.joining is False:
+                                self.joining = True
+                                self.joinText = "JOINING"
+                                self.joinColorRect = constants.CustomRed.darken(50)
+                            else:
+                                self.joining = False
+                                self.joinText = "JOIN"
 
             if self.userInput:
                 if self.loadingImageALPHA > 0:
@@ -97,7 +120,7 @@ class MainMenu:
                 self.playRect.centerx = self.display.get_rect().centerx
                 self.playRect.y = 20
 
-                self.joinRect = self.FONTjoinButton.get_rect("JOIN", size=40)
+                self.joinRect = self.FONTjoinButton.get_rect(self.joinText, size=40)
                 self.joinRect.centerx = self.display.get_rect().centerx
                 self.joinRect.y = 650
 
@@ -123,8 +146,10 @@ class MainMenu:
                                            size=self.playSize)
 
                 if self.inPlay:
-                    customRect = pygame.Rect(self.joinRect.x - self.joinPadx, self.joinRect.y - self.joinPady, self.joinRect.width + self.joinPadw, self.joinRect.height + self.joinPadh)
-                    pygame.draw.rect(self.display, self.joinColorRect, customRect)
-                    self.FONTjoinButton.render_to(self.display, self.joinRect, "JOIN", fgcolor=self.joinColor, size=40)
+                    if not self.joining:
+                        self.customJoinRect = pygame.Rect(self.joinRect.x - self.joinPadx, self.joinRect.y - self.joinPady, self.joinRect.width + self.joinPadw, self.joinRect.height + self.joinPadh)
+
+                    pygame.draw.rect(self.display, self.joinColorRect, self.customJoinRect)
+                    self.FONTjoinButton.render_to(self.display, self.joinRect, self.joinText, fgcolor=self.joinColor, size=40)
 
             pygame.display.flip()

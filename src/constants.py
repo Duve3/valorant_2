@@ -1,4 +1,28 @@
 # CTRL-C + CTRL-V of duve3pygameutil library's constants.
+from pygame import Color
+
+
+class __CustomColor(Color):
+    def __init__(self, colorTuple, a=255):  # accepts type list too
+        Color.__init__(self, colorTuple[0], colorTuple[1], colorTuple[2], a)
+        self.color = colorTuple
+
+    def darken(self, offset: int) -> list:
+        darkColor = [0, 0, 0]  # [0] * 3
+        for i, c in enumerate(self.color):
+            nc = c - offset
+            darkColor[i] = nc if nc >= 0 else 0
+
+        return darkColor
+
+    def lighten(self, offset: int) -> list:
+        lighterColor = [0, 0, 0]  # [0] * 3
+        for i, c in enumerate(self.color):
+            nc = c + offset
+            lighterColor[i] = nc if nc <= 255 else 255
+
+        return lighterColor
+
 
 white = (255, 255, 255)
 black = (0, 0, 0)
@@ -12,8 +36,9 @@ gray = (150, 150, 150)
 whiteGray = (200, 200, 200)
 yellow = (255, 255, 0)
 orange = (255, 150, 0)
+
 logoColor = (15, 25, 35)
-CustomRed = (255, 70, 82)
+CustomRed = __CustomColor((255, 70, 82))
 
 colorList = [white, black, red, grayRed, green, grayGreen, blue, gray, whiteGray, yellow, orange]
 
