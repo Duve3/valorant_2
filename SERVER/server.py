@@ -4,7 +4,7 @@ import json
 
 server = ""
 port = 5000
-header = 2048  # bytes or bits idk
+header = 2048  # bytes or bits I dont know
 encoding = "utf-8"
 disconnect_msg = "!DISCONNECT"
 disconnect_res = "DISCONNECTED"
@@ -34,7 +34,7 @@ def playerDataHandler(givenData: str):
     global playerData
 
     givenData = givenData.replace(PlayerData_MSG, "")
-    givenData = givenData.replace("'", '"')  # replace '' to "" since ' isn't allowed in json
+    givenData = givenData.replace("'", '"')  # replace '' to " since ' isn't allowed in json
 
     print(f"On FINAL for loads, data:\n\t{givenData}")
     Dictionary = json.loads(givenData)  # load the playerData into json format (dictionary)

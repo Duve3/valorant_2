@@ -1,4 +1,3 @@
-# CTRL-C + CTRL-V of duve3pygameutil library's constants.
 from pygame import Color
 
 
