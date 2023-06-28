@@ -1,6 +1,6 @@
 import pygame
 import constants
-from util import createFont
+from util import createFont, UIPopup
 import sys
 
 
@@ -50,12 +50,11 @@ class MainMenu:
         self.joining = False
 
 
-
-
     def run(self):
         while True:
             self.fpsClock.tick(60)
-            for event in pygame.event.get():
+            allEvents = pygame.event.get()
+            for event in allEvents:
                 if event.type == pygame.QUIT:
                     sys.exit()  # exit but better
 
@@ -153,3 +152,14 @@ class MainMenu:
                     self.FONTjoinButton.render_to(self.display, self.joinRect, self.joinText, fgcolor=self.joinColor, size=40)
 
             pygame.display.flip()
+
+
+class JoinPopup(UIPopup):
+    def __init__(self, pos, size):
+        super().__init__(pos=pos, size=size)
+        self.username = ""
+
+    def placeElements(self):
+        self.surface.fill(constants.black)
+        FONTtext = createFont(constants.white, 50, fontLocation="../assets/CourierPrimeCode-Regular.ttf")
+        FONTtext.render_to()

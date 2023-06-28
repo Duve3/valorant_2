@@ -1,102 +1,115 @@
 import socket
-import threading
-import json
+from _thread import *
+from player import Player
+from player import Agents
+import pickle
+import random
+import pygame
 
-server = ""
-port = 5000
-header = 2048  # bytes or bits I dont know
 encoding = "utf-8"
-disconnect_msg = "!DISCONNECT"
-disconnect_res = "DISCONNECTED"
-PlayerData_MSG = "PLAYERDATA:"
-PlayerData_RES = "RECEIVED"
-ReqData_MSG = "REQDATA"
-NewID_MSG = "GIVEID"
-NewID_RES = "ID:"
-SelfData_MSG = "SELFDATA:"
-SelfData_RES = "DATA:"
-Joining_MSG = "JOINING:"
-Joining_RES = "JOINING"
+DisconnectMSG = "!!!Disconnect"
+DisconnectRES = "Disconnected"
+
+
+server = "127.0.0.1"
+port = 5556
+header = 4096
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
     s.bind((server, port))
-except socket.error as err:
-    print(f"FATAL ERROR:\n\t{str(err)}")
+except socket.error as e:
+    str(e)
+    print(e)
 
-idCounter = 0
-
-playerData = {}
-
-
-def playerDataHandler(givenData: str):
-    global playerData
-
-    givenData = givenData.replace(PlayerData_MSG, "")
-    givenData = givenData.replace("'", '"')  # replace '' to " since ' isn't allowed in json
-
-    print(f"On FINAL for loads, data:\n\t{givenData}")
-    Dictionary = json.loads(givenData)  # load the playerData into json format (dictionary)
-    playerData = Dictionary
-    return playerData
+s.listen()
+print("Waiting for a connection, Server Started")
 
 
-def returnSelfData(pid: int):
-    global playerData
-
-    return playerData[pid]
+playerList = {}
 
 
-def idHandler():
-    global idCounter
-    idCounter += 1
-    return idCounter - 1
+def threaded_client(conn, pid):
+    if pid in playerList:
+        conn.send(pickle.dumps(playerList[pid]))
+    else:
+        newPlayer = Player(pid, 0, 0, ["MA", "MB", "MC"], Agents.JETT)
+        conn.send(pickle.dumps(newPlayer))
+        playerList[pid] = newPlayer
 
+    ip = conn.getpeername()[0]
 
-def handle(conn: socket.socket, addr):
-    plrData = {}
+    nums = ip.split(".")
+
+    total = sum([int(num) for num in nums])
+
+    rank = total // 4  # floor divide
+
+    print(f"{rank = }")
 
     while True:
-        msg_length = conn.recv(header).decode(encoding)
-        if msg_length:
-            msg_length = int(msg_length)
-            msg = conn.recv(msg_length).decode(encoding)
-            print(f"[{addr}] - {msg} with length: {msg_length}")
-            if msg == disconnect_msg:
-                conn.send(disconnect_res.encode(encoding))
+        try:
+            data = conn.recv(header)
 
-            elif msg.startswith(PlayerData_MSG):
-                plrData = playerDataHandler(msg)
-                conn.send(PlayerData_RES.encode(encoding))
-
-            elif msg == ReqData_MSG:
-                conn.send(str(plrData).encode(encoding))
-
-            elif msg == NewID_MSG:
-                newID = idHandler()
-                conn.send(str(newID).encode(encoding))
-
-            elif msg.startswith(SelfData_MSG):
-                selfData = returnSelfData(int(msg.replace(SelfData_MSG, "")))
-                conn.send(str(selfData).encode(encoding))
-
+            if data == DisconnectMSG.encode(encoding):
+                print("Disconnected")
+                del playerList[pid]
+                conn.send(DisconnectRES.encode(encoding))
+                break
             else:
-                conn.send(msg.encode(encoding))
+                reply = [x for i, x in enumerate(playerList.values()) if i != pid and x is not None]
+
+            DataPickled = pickle.loads(data)
+
+            print("Received: ", data)
+            print("Sending : ", reply)
+            try:
+                print(f"{(reply[0].x, reply[0].y) = }")
+            except IndexError as ee:
+                print(f"l59 - {ee = }")
+
+            playerList[pid].x = DataPickled[0]  # x
+            playerList[pid].y = DataPickled[1]  # y
+            playerList[pid].update()  # update rect
+
+            # game logic
+            collisionList = [pygame.Rect(plr.rect) for plr in reply]
+            collision = pygame.Rect.collidelist(pygame.Rect(playerList[pid].rect), collisionList)
+            if collision != -1:
+                print(f"{collision = }")
+                print(f"{collisionList = }")
+                print(f"{[playerList.keys()] = }")
+                collideID = [key for key in playerList.keys()].index(reply[collision].id)  # we are doing key for key ... because we are trying to avoid getting a dict_keys object from the playerList.keys()
+                print(f"{collideID = }")
+                playerList[collideID].health -= 0.1
+
+            for plr in playerList.values():
+                plr.width = abs(plr.health // 2)
+                plr.height = abs(plr.health // 2)
 
 
-def listen():
-    s.listen()
-    print("Waiting...")
-    while True:
-        conn, addr = s.accept()
-        print(f"New connection: {conn}, {addr}")
 
-        thread = threading.Thread(target=handle, args=(conn, addr), daemon=True)
-        thread.start()
-        print(f"There is currently: {threading.activeCount() - 1} clients!")
-        thread.join()  # removed timeout for testing purposes
+            # refresh reply
+            reply = [x for i, x in enumerate(playerList.values()) if i != pid and x is not None]
+
+            print(f"{playerList[pid].__vars__() = }")
+
+            conn.sendall(pickle.dumps(reply))
+            conn.sendall(pickle.dumps(playerList[pid]))
+
+        except Exception as err:
+            print(f"{err = }")
+            break
+
+    print("Lost connection")
+    conn.close()
 
 
-if __name__ == "__main__":
-    listen()
+currentPlayer = 0
+while True:
+    conn, addr = s.accept()
+    print("Connected to:", addr)
+
+    start_new_thread(threaded_client, (conn, currentPlayer))
+    currentPlayer += 1
