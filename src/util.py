@@ -31,25 +31,43 @@ class UIPopup:
             screen.blit(self.surface, (self.x, self.y))
 
 
+# TODO: fix text not correct color when using placeholder object.
 class InputField:
-    def __init__(self, pos, size, charLimit: int = 20, font=createFont(constants.gray, 40, fontLocation="CourierPrimeCode-Regular.ttf")):
+    def __init__(self, pos, size, activeColor, unactiveColor, font, charLimit: int = 20, surfaceOffset=(0, 0), placeHolderText=""):
         self.x = pos[0]
         self.y = pos[1]
         self.active = False
         self.rect = pygame.Rect(pos, size)
         self.text = ""
+        self.ColorActive = activeColor
+        self.ColorUnactive = unactiveColor
+        self.color = self.ColorUnactive
         self.charLimit = charLimit
         self.font = font
+        self.FONTPlaceholder = font
+        darkerColor = [0, 0, 0, 255]
+        for i, color in enumerate(self.font.fgcolor):
+            if i == 3:
+                break
+            darkerColor[i] = color - 60
+        print(f"{self.font.fgcolor = }")
+        self.FONTPlaceholder.fgcolor = darkerColor
+        print(f"{self.FONTPlaceholder.fgcolor = }")
+        self.placeholderText = placeHolderText
+        self.surfaceOffset = surfaceOffset
 
     def handleEvents(self, events):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.rect.collidepoint(event.pos):
+                mx, my = pygame.mouse.get_pos()
+                mx -= self.surfaceOffset[0]
+                my -= self.surfaceOffset[1]
+                if self.rect.collidepoint(mx, my):
                     self.active = True
                 else:
                     self.active = False
 
-            elif event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN and self.active:
 
                 # Check for backspace
                 if event.key == pygame.K_BACKSPACE:
@@ -59,5 +77,18 @@ class InputField:
 
                 # Unicode standard is used for string
                 # formation
-                else:
+                elif len(self.text) < self.charLimit:
                     self.text += event.unicode
+
+        if self.active:
+            self.color = self.ColorActive
+        else:
+            self.color = self.ColorUnactive
+
+    def draw(self, screen, offsets=(5, 5)):
+        self.rect = pygame.Rect((self.x, self.y), (self.rect.w, self.rect.h))
+        pygame.draw.rect(screen, self.color, self.rect)
+        if len(self.text) <= 0:
+            self.FONTPlaceholder.render_to(screen, ((self.rect.centerx - self.FONTPlaceholder.get_rect(self.placeholderText, size=self.FONTPlaceholder.size).centerx) + offsets[0], self.y + offsets[1]), self.placeholderText)
+        else:
+            self.font.render_to(screen, ((self.rect.centerx - self.font.get_rect(self.text, size=self.font.size).centerx) + offsets[0], self.y + offsets[1]), self.text)
