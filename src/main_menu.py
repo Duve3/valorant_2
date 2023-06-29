@@ -167,10 +167,11 @@ class JoinPopup(UIPopup):
     def __init__(self, pos, size):
         super().__init__(pos=pos, size=size)
         font = createFont(constants.white, 40, fontLocation="../assets/CourierPrimeCode-Regular.ttf")
-        self.IF = InputField((size[0] // 2 - 263, 60), (525, 40), constants.gray, (175, 175, 175), font, charLimit=20, surfaceOffset=pos, placeHolderText="Username")
+        phFont = createFont((190, 190, 190), 40, fontLocation="../assets/CourierPrimeCode-Regular.ttf")
+        self.IF = InputField((size[0] // 2 - 263, 60), (525, 40), constants.gray, (175, 175, 175), font, phFont, charLimit=20, surfaceOffset=pos, placeHolderText="Username")
 
     def placeElements(self):
         self.surface.fill(constants.black)
         FONTtext = createFont(constants.white, 40, fontLocation="../assets/CourierPrimeCode-Regular.ttf")
-        FONTtext.render_to(self.surface, (self.surface.get_rect().centerx - FONTtext.get_rect("Enter Username: ", size=40).centerx, 20), "Enter Username: ")
+        FONTtext.render_to(self.surface, (self.surface.get_rect().centerx - FONTtext.get_rect("Enter Username:", size=40).centerx, 20), "Enter Username:")
         self.IF.draw(self.surface)
