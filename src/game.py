@@ -114,7 +114,3 @@ while running:
     fpsClock.tick(60)
     pygame.display.flip()
 pygame.quit()
-    fpsClock.tick(60)
-    print(len(bullets))
-
-pygame.quit()
