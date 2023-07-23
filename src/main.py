@@ -1,12 +1,12 @@
 import pygame
 from main_menu import MainMenu
+from disclaimer_menu import DisclaimerMenu
 import ctypes
-
 
 
 def main():  # the main game
     # setting the logo for the game
-    myappid = u'alterragames.valorant2d.testing.main'  # arbitrary string
+    myappid = u'alterra.games.valorant2d.testing'  # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
     pygame.init()
@@ -18,9 +18,11 @@ def main():  # the main game
     window = pygame.display.set_mode(RES)
     fpsClock = pygame.time.Clock()
     mm = MainMenu(window=window, fpsClock=fpsClock, width=RES[0], height=RES[1])
+    dm = DisclaimerMenu(window=window, fpsClock=fpsClock, width=RES[0], height=RES[1])
 
-
-    MainMenu.run(mm)
+    dm.run()
+    mm.userInput = True
+    mm.run()
 
 
 if __name__ == "__main__":  # entry point
