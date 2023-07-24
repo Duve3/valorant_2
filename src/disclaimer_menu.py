@@ -6,7 +6,7 @@ import sys
 
 class DisclaimerMenu:
     """
-    Main Menu
+    Disclaimer Menu
     """
 
     def __init__(self, window: pygame.Surface, fpsClock: pygame.time.Clock, width: int, height: int):
