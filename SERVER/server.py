@@ -3,7 +3,6 @@ from _thread import *
 from player import Player
 from player import Agents
 import pickle
-import random
 import pygame
 
 encoding = "utf-8"
@@ -20,7 +19,6 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 try:
     s.bind((server, port))
 except socket.error as e:
-    str(e)
     print(e)
 
 s.listen()
@@ -38,6 +36,7 @@ def threaded_client(conn, pid):
         conn.send(pickle.dumps(newPlayer))
         playerList[pid] = newPlayer
 
+    # create rank based on player ip?
     ip = conn.getpeername()[0]
 
     nums = ip.split(".")
@@ -67,7 +66,7 @@ def threaded_client(conn, pid):
             try:
                 print(f"{(reply[0].x, reply[0].y) = }")
             except IndexError as ee:
-                print(f"l59 - {ee = }")
+                print(f"l69 - {ee = }")
 
             playerList[pid].x = DataPickled[0]  # x
             playerList[pid].y = DataPickled[1]  # y

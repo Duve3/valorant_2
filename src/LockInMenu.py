@@ -1,12 +1,10 @@
 import sys
 import pygame
 from util import createFont
+from util.menu import Menu
 import constants
 
 
-class LockIn:
+class LockIn(Menu):
     def __init__(self, window: pygame.Surface, fpsClock: pygame.time.Clock, width: int, height: int):
-        self.screen = window
-        self.fpsClock = fpsClock
-        self.RES = (width, height)
-
+        super().__init__(window, fpsClock, width, height)
