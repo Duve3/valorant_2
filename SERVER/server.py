@@ -9,6 +9,10 @@ encoding = "utf-8"
 DisconnectMSG = "!!!Disconnect"
 DisconnectRES = "Disconnected"
 
+# antiCheat
+MAX_X_MOVEMENT_PF = 10
+MAX_Y_MOVEMENT_PF = 10
+
 
 server = "127.0.0.1"
 port = 5556
@@ -67,10 +71,23 @@ def threaded_client(conn, pid):
                 print(f"{(reply[0].x, reply[0].y) = }")
             except IndexError as ee:
                 print(f"l69 - {ee = }")
+            # data checks
+            ACR = ""
+            if abs(playerList[pid].x - DataPickled[0]) > MAX_X_MOVEMENT_PF:  # moved more than ~ units in 1 frame
+                playerList[pid].x = playerList[pid].x
+                ACR = "MAX_X_MOVEMENT_PF EXCEEDED"
+            else:
+                playerList[pid].x = DataPickled[0]  # x
 
-            playerList[pid].x = DataPickled[0]  # x
-            playerList[pid].y = DataPickled[1]  # y
+            if abs(playerList[pid].y - DataPickled[1]) > MAX_Y_MOVEMENT_PF:
+                playerList[pid].y = playerList[pid].y
+                ACR = "MAX_Y_MOVEMENT_PF EXCEEDED"
+            else:
+                playerList[pid].y = DataPickled[1]  # y
             playerList[pid].update()  # update rect
+
+            if ACR != "":
+                print("ANTICHEAT: Triggered on player id:", pid, "with reason:\"", ACR, "\"")
 
             # game logic
             collisionList = [pygame.Rect(plr.rect) for plr in reply]

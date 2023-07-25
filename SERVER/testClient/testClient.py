@@ -1,83 +1,84 @@
-import socket
-import pickle
+# this is here because I want type hints but do not want to import pygame
 import pygame
+
+from enum import Enum
 
 from src import constants
 
 
-class Client:
-    def __init__(self):
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "127.0.0.1"
-        self.port = 5556
-        self.addr = (self.server, self.port)
-        self.DisconnectMSG = "!!!Disconnect"
-        self.DisconnectRES = "Disconnected"
-        self.header = 4096
-        self.encoding = "utf-8"
-
-        self.p = self.connect()
-
-    def getSelfPlayer(self):
-        return self.p
-
-    def connect(self):
-        try:
-            self.client.connect(self.addr)
-            return pickle.loads(self.client.recv(self.header))
-        except Exception as e:
-            print(f"l24 - {e = }")
-            pass
-
-    def sendPlayerData(self, data):
-        try:
-            freshData = (data.x, data.y)
-            self.client.send(pickle.dumps(freshData))
-            playerList = self.client.recv(self.header)
-            selfData = self.client.recv(self.header)
-            print(f"{selfData = }, {playerList = }")
-            return pickle.loads(playerList), pickle.loads(selfData)
-        except socket.error as e:
-            print(f"l32 - {e = }")
-
-    def disconnect(self):
-        try:
-            self.client.send(self.DisconnectMSG.encode(self.encoding))
-            res = self.client.recv(self.header)
-            if res != self.DisconnectRES.encode(self.encoding):
-                print("WARNING: Server did not respond with proper response on disconnect!\nDisconnecting Anyways...")
-        except socket.error as e:
-            print(f"l41 - {e = }")
+class Agents(Enum):
+    JETT = "JETT"
+    RAZE = "RAZE"
+    BRIMSTONE = "BRIM"
+    SOVA = "SOVA"
+    CYPHER = "CYHR"
+    SAGE = "SAGE"
 
 
-if __name__ == "__main__":
-    screen = pygame.display.set_mode([500, 500])
-    fpsClock = pygame.time.Clock()
-    fps = 60
-    run = True
-    client = Client()
-    player = client.getSelfPlayer()
-    playerList = []
-    while run:
-        fpsClock.tick(fps)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                client.disconnect()
-                run = False
+class Models(Enum):
+    JETT = ["JMA", "JMB", "JMC"]
+    RAZE = []
+    BRIMSTONE = []
+    SOVA = []
+    CYPHER = []
+    SAGE = []
 
-        # logic
-        keys = pygame.key.get_pressed()
 
-        player.handleMovement(keys)
+class Player:
+    def __init__(self, pid, x, y, models, agent: Agents):
+        self.id = pid
+        self.x = x
+        self.vx = 0
+        self.y = y
+        self.vy = 0
+        self.width = 50
+        self.height = 100
+        self.models = models
+        self.agent = agent
+        self.currentModelID = 0
+        self.currentWeapon = None  # add later
+        self.health = 100
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.healthBar = pygame.Rect(self.x, self.y + 100, self.health//2, 5)
+        self.redBar = pygame.Rect(self.x, self.y + 100, 50, 5)
 
-        # rendering
-        screen.fill(constants.white)
+    def draw(self, display: pygame.Surface, wireframe: bool = False):
+        if wireframe:
+            pygame.draw.rect(display, constants.blue, self.rect, width=5)
+        else:
+            pygame.draw.rect(display, constants.blue, self.rect)
 
-        player.draw(screen, wireframe=True)
+        pygame.draw.rect(display, constants.red, self.redBar)
+        pygame.draw.rect(display, constants.green, self.healthBar)
 
-        for plr in playerList:
-            plr.draw(screen, wireframe=True)
+        # display.blit(self.models[self.currentModelID], self.rect)
 
-        pygame.display.flip()
+    def update(self):
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.healthBar = pygame.Rect(self.x, self.y + 10, self.health//2, 5)
+        self.redBar = pygame.Rect(self.x, self.y + 110, 50, 5)
 
-        playerList, player = client.sendPlayerData(player)
+    def handleMovement(self, keys):
+        # key handling
+        if keys[pygame.K_w]:
+            self.vy += 5
+
+        if keys[pygame.K_s]:
+            self.vy -= 5
+
+        if keys[pygame.K_a]:
+            self.vx -= 5
+
+        if keys[pygame.K_d]:
+            self.vx += 5
+
+        # movement
+        self.x += self.vx
+        self.y += self.vy
+
+        # velo decay
+        self.vy = self.vy - 1 if self.vy > 0 else 0
+        self.vx = self.vx - 1 if self.vx > 0 else 0
+
+    def __vars__(self):
+        return vars(self)

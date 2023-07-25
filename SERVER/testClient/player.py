@@ -39,17 +39,24 @@ class Player:
         self.currentWeapon = None  # add later
         self.health = 100
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.healthBar = pygame.Rect(self.x, self.y + 100, self.health//2, 5)
+        self.redBar = pygame.Rect(self.x, self.y + 100, 50, 5)
 
     def draw(self, display: pygame.Surface, wireframe: bool = False):
         if wireframe:
-            pygame.draw.rect(display, constants.green, self.rect, width=5)
+            pygame.draw.rect(display, constants.blue, self.rect, width=5)
         else:
-            pygame.draw.rect(display, constants.green, self.rect)
+            pygame.draw.rect(display, constants.blue, self.rect)
+
+        pygame.draw.rect(display, constants.red, self.redBar)
+        pygame.draw.rect(display, constants.green, self.healthBar)
 
         # display.blit(self.models[self.currentModelID], self.rect)
 
     def update(self):
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.healthBar = pygame.Rect(self.x, self.y + 10, self.health//2, 5)
+        self.redBar = pygame.Rect(self.x, self.y + 110, 50, 5)
 
     def handleMovement(self, keys):
         # key handling
