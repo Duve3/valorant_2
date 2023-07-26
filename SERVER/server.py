@@ -1,17 +1,14 @@
 import socket
-from _thread import *
+from _thread import start_new_thread
 from player import Player
 from player import Agents
+from antiCheat import checkValues
 import pickle
 import pygame
 
 encoding = "utf-8"
 DisconnectMSG = "!!!Disconnect"
 DisconnectRES = "Disconnected"
-
-# antiCheat
-MAX_X_MOVEMENT_PF = 10
-MAX_Y_MOVEMENT_PF = 10
 
 
 server = "127.0.0.1"
@@ -65,58 +62,39 @@ def threaded_client(conn, pid):
 
             DataPickled = pickle.loads(data)
 
-            print("Received: ", data)
-            print("Sending : ", reply)
-            try:
-                print(f"{(reply[0].x, reply[0].y) = }")
-            except IndexError as ee:
-                print(f"l69 - {ee = }")
-            # data checks
-            ACR = ""
-            if abs(playerList[pid].x - DataPickled[0]) > MAX_X_MOVEMENT_PF:  # moved more than ~ units in 1 frame
-                playerList[pid].x = playerList[pid].x
-                ACR = "MAX_X_MOVEMENT_PF EXCEEDED"
-            else:
-                playerList[pid].x = DataPickled[0]  # x
+            # print("Received: ", data)
+            # print("Sending : ", reply)
+            # try:
+            #     print(f"{(reply[0].x, reply[0].y) = }")
+            # except IndexError as ee:
+            #     print(f"l69 - {ee = }")
 
-            if abs(playerList[pid].y - DataPickled[1]) > MAX_Y_MOVEMENT_PF:
-                playerList[pid].y = playerList[pid].y
-                ACR = "MAX_Y_MOVEMENT_PF EXCEEDED"
-            else:
-                playerList[pid].y = DataPickled[1]  # y
+            # antiCheat
+            checkValues(DataPickled, playerList, pid)
             playerList[pid].update()  # update rect
 
-            if ACR != "":
-                print("ANTICHEAT: Triggered on player id:", pid, "with reason:\"", ACR, "\"")
-
             # game logic
+            """
             collisionList = [pygame.Rect(plr.rect) for plr in reply]
             collision = pygame.Rect.collidelist(pygame.Rect(playerList[pid].rect), collisionList)
             if collision != -1:
-                print(f"{collision = }")
-                print(f"{collisionList = }")
-                print(f"{[playerList.keys()] = }")
                 collideID = [key for key in playerList.keys()].index(reply[collision].id)  # we are doing key for key ... because we are trying to avoid getting a dict_keys object from the playerList.keys()
-                print(f"{collideID = }")
-                playerList[collideID].health -= 0.1
-
-            for plr in playerList.values():
-                plr.width = abs(plr.health // 2)
-                plr.height = abs(plr.health // 2)
-
-
+                if playerList[collideID].iframes <= 0:
+                    playerList[collideID].health -= 1
+                    playerList[collideID].iframes = 5
+            """
 
             # refresh reply
             reply = [x for i, x in enumerate(playerList.values()) if i != pid and x is not None]
 
-            print(f"{playerList[pid].__vars__() = }")
+            # print(f"{playerList[pid].__vars__() = }")
+            playerList[pid].iframes = playerList[pid].iframes - 1 if playerList[pid].iframes > 0 else 0
 
             conn.sendall(pickle.dumps(reply))
             conn.sendall(pickle.dumps(playerList[pid]))
 
         except Exception as err:
-            print(f"{err = }")
-            break
+            raise err
 
     print("Lost connection")
     conn.close()
@@ -124,8 +102,8 @@ def threaded_client(conn, pid):
 
 currentPlayer = 0
 while True:
-    conn, addr = s.accept()
+    connection, addr = s.accept()
     print("Connected to:", addr)
 
-    start_new_thread(threaded_client, (conn, currentPlayer))
+    start_new_thread(threaded_client, (connection, currentPlayer))
     currentPlayer += 1
