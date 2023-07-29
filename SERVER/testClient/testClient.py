@@ -5,9 +5,9 @@ Test client, it is essentially the game but just stripped down to the client lev
 import socket
 import pickle
 import pygame
-
 from src import constants
-
+from SERVER.constants import PlayerListSTART, PlayerListEND, PlayerEND, PlayerSTART, DisconnectMSG, DisconnectRES, encoding
+from player import Player
 
 class Client:
     def __init__(self):
@@ -15,10 +15,8 @@ class Client:
         self.server = "127.0.0.1"
         self.port = 5556
         self.addr = (self.server, self.port)
-        self.DisconnectMSG = "!!!Disconnect"
-        self.DisconnectRES = "Disconnected"
         self.header = 4096
-        self.encoding = "utf-8"
+        self.client.settimeout(10)
 
         self.p = self.connect()
 
@@ -28,7 +26,16 @@ class Client:
     def connect(self):
         try:
             self.client.connect(self.addr)
-            return pickle.loads(self.client.recv(self.header))
+            data = b""
+            if self.client.recv(self.header) == PlayerSTART.encode(encoding):
+                while True:
+                    packet = self.client.recv(self.header)
+                    if packet == PlayerEND.encode(encoding):
+                        break
+                    data += packet
+                    print("packet", packet)
+            print("data:", data)
+            return pickle.loads(data)
         except Exception as e:
             print(f"l24 - {e = }")
             raise e
@@ -37,18 +44,33 @@ class Client:
         try:
             freshData = (data.x, data.y)
             self.client.send(pickle.dumps(freshData))
-            playerList = self.client.recv(self.header)
-            selfData = self.client.recv(self.header)
-            print(f"{selfData = }, {playerList = }")
-            return pickle.loads(playerList), pickle.loads(selfData)
+            plrList = b""
+            if self.client.recv(self.header) == PlayerListSTART.encode(encoding):
+                while True:
+                    packet = self.client.recv(self.header)
+                    if packet == PlayerListEND.encode(encoding):
+                        break
+                    plrList += packet
+
+            rplr = b""
+            if self.client.recv(self.header) == PlayerSTART.encode(encoding):
+                while True:
+                    packet = self.client.recv(self.header)
+                    if packet == PlayerEND.encode(encoding):
+                        break
+                    rplr += packet
+
+            print(f"{rplr = }, {plrList = }")
+            return pickle.loads(plrList), pickle.loads(rplr)
         except socket.error as e:
             print(f"l32 - {e = }")
+            raise e
 
     def disconnect(self):
         try:
-            self.client.send(self.DisconnectMSG.encode(self.encoding))
+            self.client.send(DisconnectMSG.encode(encoding))
             res = self.client.recv(self.header)
-            if res != self.DisconnectRES.encode(self.encoding):
+            if res != DisconnectRES.encode(encoding):
                 print("WARNING: Server did not respond with proper response on disconnect!\nDisconnecting Anyways...")
         except socket.error as e:
             print(f"l41 - {e = }")
@@ -60,11 +82,12 @@ if __name__ == "__main__":
     fps = 60
     run = True
     client = Client()
-    player = client.getSelfPlayer()
+    player: Player = client.getSelfPlayer()
     playerList = []
     while run:
         fpsClock.tick(fps)
-        for event in pygame.event.get():
+        events = pygame.event.get()
+        for event in events:
             if event.type == pygame.QUIT:
                 client.disconnect()
                 run = False
@@ -73,9 +96,8 @@ if __name__ == "__main__":
             break
 
         # logic
-        keys = pygame.key.get_pressed()
-
-        player.handleMovement(keys)
+        # auto hook events
+        player.hookEvents(events)
 
         # rendering
         screen.fill(constants.white)

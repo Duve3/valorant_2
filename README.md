@@ -1,3 +1,9 @@
 # valorant_2(d)
 Valorant_2(d) is a 2d version of valorant. We thought of the idea after looking at [this scratch game](https://scratch.mit.edu/projects/414069875/)
-which seemed unique and a good idea to port to python game using pygame.
+which seemed a unique and good idea to port to python using **pygame**.
+
+### How does it work
+The overall game is just a simple pygame game, it's the multiplayer part that becomes difficult.
+
+Our server is using **pickle** (expected to be updated within 30 days of release) to transmit data to clients.
+

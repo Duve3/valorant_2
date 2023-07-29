@@ -1,0 +1,7 @@
+PlayerListSTART = "!PLAYERLISTSTART"
+PlayerListEND = "!PLAYERLISTEND"
+PlayerSTART = "!PLAYERSTART"
+PlayerEND = "!PLAYEREND"
+DisconnectMSG = "!!!Disconnect"
+DisconnectRES = "Disconnected"
+encoding = "utf-8"
