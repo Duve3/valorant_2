@@ -1,4 +1,5 @@
 import socket
+import time
 from _thread import start_new_thread
 from player import Player, Agents, Models, Rifle
 from antiCheat import checkValues
@@ -19,15 +20,20 @@ def copyGameStatus():
 
 def threaded_client(conn, pid):
     if pid in playerList:
-        conn.send(PlayerListSTART.encode(encoding))
+        conn.send(PlayerSTART.encode(encoding))
         conn.sendall(pickle.dumps(playerList[pid]))
-        conn.send(PlayerListEND.encode(encoding))
+        conn.send(PlayerEND.encode(encoding))
     else:
         newPlayer = Player(pid, 0, 0, ["MA", "MB", "MC"], Agents.JETT)
-        conn.send(PlayerSTART.encode(encoding))
-        conn.send(pickle.dumps(newPlayer))
-        conn.send(PlayerEND.encode(encoding))
         playerList[pid] = newPlayer
+        conn.send(PlayerSTART.encode(encoding))
+        print("send plr start")
+        conn.sendall(pickle.dumps(newPlayer))
+        newPlayer.__setstate__(newPlayer.__dict__)
+        print("sent all data")
+        time.sleep(1)
+        conn.send(PlayerEND.encode(encoding))
+        print("sent player end")
 
     # create rank based on player ip?
     ip = conn.getpeername()[0]
@@ -53,6 +59,8 @@ def threaded_client(conn, pid):
                 reply = [x for i, x in enumerate(playerList.values()) if i != pid and x is not None]
 
             DataPickled = pickle.loads(data)
+            print("recieved:", DataPickled)
+            print("playerList:", playerList)
 
             # print("Received: ", data)
             # print("Sending : ", reply)
@@ -75,6 +83,7 @@ def threaded_client(conn, pid):
                     playerList[collideID].health -= 1
                     playerList[collideID].iframes = 5
             """
+            print(playerList[pid].__dict__)
             for gun in playerList[pid].weapons:
                 gun.tick()
 
@@ -86,11 +95,15 @@ def threaded_client(conn, pid):
 
             conn.send(PlayerSTART.encode(encoding))
             conn.sendall(pickle.dumps(reply))
+            time.sleep(0.2)
             conn.send(PlayerEND.encode(encoding))
 
             conn.send(PlayerListSTART.encode(encoding))
             conn.sendall(pickle.dumps(playerList[pid]))
+            time.sleep(0.2)
             conn.send(PlayerListEND.encode(encoding))
+
+            playerList[pid].__setstate__(playerList[pid].__dict__)
 
         except Exception as err:
             raise err

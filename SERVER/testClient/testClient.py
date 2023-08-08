@@ -27,7 +27,10 @@ class Client:
         try:
             self.client.connect(self.addr)
             data = b""
-            if self.client.recv(self.header) == PlayerSTART.encode(encoding):
+            d = self.client.recv(self.header)
+            if d == PlayerSTART.encode(encoding):
+                print("utf-8_encoded:", d)
+                print("utf-8_normal:", d.decode(encoding))
                 while True:
                     packet = self.client.recv(self.header)
                     if packet == PlayerEND.encode(encoding):
@@ -50,6 +53,7 @@ class Client:
                     packet = self.client.recv(self.header)
                     if packet == PlayerListEND.encode(encoding):
                         break
+                    print(packet)
                     plrList += packet
 
             rplr = b""
@@ -58,6 +62,7 @@ class Client:
                     packet = self.client.recv(self.header)
                     if packet == PlayerEND.encode(encoding):
                         break
+                    print(packet)
                     rplr += packet
 
             print(f"{rplr = }, {plrList = }")

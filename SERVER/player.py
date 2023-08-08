@@ -114,6 +114,8 @@ class Player:
         self.agent = agent
         self.__rifle = Rifle([self.x, self.y])
         self.weapons = [self.__rifle]
+        self.savableWeapons = [weapon for weapon in self.weapons]
+        self.sizes = [weapon.model.get_size() for weapon in self.weapons]
         self.currentWeapon = 0
         self.health = 100
         self.iframes = 0
@@ -172,15 +174,17 @@ class Player:
         return vars(self)
 
     def __getstate__(self):
-        sizes = [weapon.model.get_size() for weapon in self.weapons]
+        newdict = self.__dict__
         for i, weapon in enumerate(self.weapons):
-            weapon.model = [sizes[i], pygame.image.tobytes(weapon.model, "RGBA")]  # noqa - for some reason pycharm thinks that .tobytes doesnt exist on a surface as we are overwriting it with a list
-        return self.__dict__
+            newdict["savableWeapons"][i].model = [newdict["sizes"][i], pygame.image.tobytes(weapon.model, "RGBA")]  # noqa - for some reason pycharm thinks that .tobytes doesnt exist on a surface as we are overwriting it with a list
+        del newdict["weapons"]
+        return newdict
 
     def __setstate__(self, state):
         self.__dict__ = state
-        for weapon in self.weapons:
-            weapon.model = pygame.image.frombytes(weapon.model[1], weapon.model[0], "RGBA")  # noqa - same as above
+        self.weapons = self.savableWeapons
+        for i, weapon in enumerate(self.savableWeapons):
+            self.weapons[i].model = pygame.image.frombytes(weapon.model[1], weapon.model[0], "RGBA")  # noqa - same as above
 
 
 if __name__ == "__main__":
