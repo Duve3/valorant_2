@@ -6,8 +6,13 @@ import socket
 import pickle
 import pygame
 from src import constants
-from SERVER.constants import PlayerListSTART, PlayerListEND, PlayerEND, PlayerSTART, DisconnectMSG, DisconnectRES, encoding
+from SERVER.constants import PlayerListSTART, PlayerListEND, PlayerEND, PlayerSTART, DisconnectMSG, DisconnectRES, encoding, setupLogger
 from player import Player
+import logging
+
+logger = logging.getLogger("testclient-0")
+logger = setupLogger(logger)
+
 
 class Client:
     def __init__(self):
@@ -15,7 +20,7 @@ class Client:
         self.server = "127.0.0.1"
         self.port = 5556
         self.addr = (self.server, self.port)
-        self.header = 4096
+        self.header = 2048 * 120  # 240 kb of data read.
         self.client.settimeout(10)
 
         self.p = self.connect()
@@ -26,49 +31,24 @@ class Client:
     def connect(self):
         try:
             self.client.connect(self.addr)
-            data = b""
-            d = self.client.recv(self.header)
-            if d == PlayerSTART.encode(encoding):
-                print("utf-8_encoded:", d)
-                print("utf-8_normal:", d.decode(encoding))
-                while True:
-                    packet = self.client.recv(self.header)
-                    if packet == PlayerEND.encode(encoding):
-                        break
-                    data += packet
-                    print("packet", packet)
-            print("data:", data)
+            data = self.client.recv(self.header)
+            logger.debug("data:", data)  # data will purposely not go into file because it will crash pycharm
             return pickle.loads(data)
         except Exception as e:
-            print(f"l24 - {e = }")
+            logger.error(e)
             raise e
 
     def sendPlayerData(self, data):
         try:
             freshData = (data.x, data.y)
             self.client.send(pickle.dumps(freshData))
-            plrList = b""
-            if self.client.recv(self.header) == PlayerListSTART.encode(encoding):
-                while True:
-                    packet = self.client.recv(self.header)
-                    if packet == PlayerListEND.encode(encoding):
-                        break
-                    print(packet)
-                    plrList += packet
 
-            rplr = b""
-            if self.client.recv(self.header) == PlayerSTART.encode(encoding):
-                while True:
-                    packet = self.client.recv(self.header)
-                    if packet == PlayerEND.encode(encoding):
-                        break
-                    print(packet)
-                    rplr += packet
+            dataTuple: tuple = pickle.loads(self.client.recv(self.header))
 
-            print(f"{rplr = }, {plrList = }")
-            return pickle.loads(plrList), pickle.loads(rplr)
-        except socket.error as e:
-            print(f"l32 - {e = }")
+            return dataTuple[0], dataTuple[1]
+
+        except Exception as e:
+            logger.error(e)
             raise e
 
     def disconnect(self):
@@ -76,9 +56,10 @@ class Client:
             self.client.send(DisconnectMSG.encode(encoding))
             res = self.client.recv(self.header)
             if res != DisconnectRES.encode(encoding):
-                print("WARNING: Server did not respond with proper response on disconnect!\nDisconnecting Anyways...")
-        except socket.error as e:
-            print(f"l41 - {e = }")
+                logger.warning("WARNING: Server did not respond with proper response on disconnect!\nDisconnecting Anyways...")
+        except Exception as e:
+            logger.error(e)
+            raise e
 
 
 if __name__ == "__main__":

@@ -1,10 +1,8 @@
 # this is here because I want type hints but do not want to import pygame
 import math
-import pickle
 from enum import Enum
-
+import json
 import pygame
-
 from src import constants
 
 
@@ -15,6 +13,7 @@ class Agents(Enum):
     SOVA = "SOVA"
     CYPHER = "CYHR"
     SAGE = "SAGE"
+    Placeholder = "PHDR"
 
 
 class Models(Enum):
@@ -24,6 +23,24 @@ class Models(Enum):
     SOVA = []
     CYPHER = []
     SAGE = []
+    PLACEHOLDER = ['ph']
+    RIFLE = [r"C:\Users\laksh\PycharmProjects\valorant_2\assets\rifle.png"]
+
+
+class Guntypes(Enum):
+    AUTO = "auto"
+    SEMI = "semi"
+    BURST = "burst"
+
+
+class _Models(Enum):
+    JETT = Models.JETT
+    RAZE = Models.RAZE
+    BRIM = Models.BRIMSTONE
+    SOVA = Models.SOVA
+    CYHR = Models.CYPHER
+    SAGE = Models.SAGE
+    PHDR = Models.PLACEHOLDER
 
 
 class Bullet:
@@ -60,7 +77,7 @@ class Gun:
         self.bullets: [Bullet] = []  # the list of bullets that have been fired by the gun
         self.pos: [] = [pos[0], pos[1]]  # the position of the gun currently
         self.rate: float = 10  # the rate of fire per second - can be overridden by superior classes
-        self.modes: [] = ["semi", "auto", "burst"]  # the modes of fire in a list
+        self.modes: [] = [Guntypes.AUTO.value, Guntypes.SEMI.value, Guntypes.BURST.value]  # the modes of fire in a list
         self.currentMode: str = "semi"  # the current mode
         self.lastFired = 0  # when the last shot was fired, 0 by default
         self.delay = 0  # the delay between shots (in ms) - overridden by superior classes
@@ -90,19 +107,22 @@ class Gun:
         for bullet in self.bullets:
             bullet.move()
 
+    def draw(self, surf: pygame.Surface):
+        surf.blit(pygame.image.load(self.model).convert_alpha(), self.pos)
+
 
 class Rifle(Gun):
     def __init__(self, pos):
         super().__init__(pos)
-        self.model = pygame.image.load("../assets/rifle.png")
+        self.model = Models.RIFLE.value
         self.rate = 10  # 10 bullets per second
-        self.modes = ["auto"]
+        self.modes = [Guntypes.AUTO.value]
         self.mode = self.modes[0]
         self.delay = self.rate / 100
 
 
 class Player:
-    def __init__(self, pid, x, y, models, agent: Agents):
+    def __init__(self, pid, x, y, agent):
         self.id = pid
         self.x = x
         self.vx = 0
@@ -110,17 +130,15 @@ class Player:
         self.vy = 0
         self.width = 50
         self.height = 100
-        self.models = models
-        self.agent = agent
-        self.__rifle = Rifle([self.x, self.y])
-        self.weapons = [self.__rifle]
-        self.savableWeapons = [weapon for weapon in self.weapons]
-        self.sizes = [weapon.model.get_size() for weapon in self.weapons]
+        self.agent = agent.value
+        self.models = getattr(_Models, self.agent).value.value
+        __rifle = Rifle([self.x, self.y])
+        self.weapons = [__rifle]
         self.currentWeapon = 0
         self.health = 100
         self.iframes = 0
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-        self.healthBar = pygame.Rect(self.x, self.y + 100, self.health//2, 5)
+        self.healthBar = pygame.Rect(self.x, self.y + 100, self.health // 2, 5)
         self.redBar = pygame.Rect(self.x, self.y + 100, 50, 5)
 
     def draw(self, display: pygame.Surface, wireframe: bool = False):
@@ -134,9 +152,9 @@ class Player:
 
         # display.blit(self.models[self.currentModelID], self.rect)
 
-    def update(self):
+    def __update(self):
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-        self.healthBar = pygame.Rect(self.x, self.y + 110, self.health//2, 5)
+        self.healthBar = pygame.Rect(self.x, self.y + 110, self.health // 2, 5)
         self.redBar = pygame.Rect(self.x, self.y + 110, 50, 5)
 
     def __handleMovement(self, keys):
@@ -170,27 +188,63 @@ class Player:
 
         self.__handleMovement(keys)
 
+        self.__update()
+
     def __vars__(self):
         return vars(self)
 
-    def __getstate__(self):
-        newdict = self.__dict__
-        for i, weapon in enumerate(self.weapons):
-            newdict["savableWeapons"][i].model = [newdict["sizes"][i], pygame.image.tobytes(weapon.model, "RGBA")]  # noqa - for some reason pycharm thinks that .tobytes doesnt exist on a surface as we are overwriting it with a list
-        del newdict["weapons"]
-        return newdict
 
-    def __setstate__(self, state):
-        self.__dict__ = state
-        self.weapons = self.savableWeapons
-        for i, weapon in enumerate(self.savableWeapons):
-            self.weapons[i].model = pygame.image.frombytes(weapon.model[1], weapon.model[0], "RGBA")  # noqa - same as above
+def JSONToPlayer(JSON: str) -> Player:
+    JSON = json.loads(JSON)
+
+    player = Player(0, 0, 0, Agents.Placeholder)  # this is all bs and is just designed as placeholders
+
+    # recreating the weapons and bullets from JSON
+    guns = JSON['weapons']
+    for i, weapon in enumerate(guns):
+        dummyGun = Gun((0, 0))
+        dummyGun.__dict__ = weapon
+        guns[i] = dummyGun
+        for i, bullet in enumerate(dummyGun.bullets):
+            dummyBullet = Bullet((0, 0), (0, 0), (0, 0))
+            dummyBullet.__dict__ = bullet
+            dummyGun.bullets[i] = dummyBullet
+
+    JSON['rect'] = pygame.Rect([int(i) for i in JSON['rect'].split(",")])
+    JSON['healthBar'] = pygame.Rect([int(i) for i in JSON['healthBar'].split(",")])
+    JSON['redBar'] = pygame.Rect([int(i) for i in JSON['redBar'].split(",")])
+
+    player.__dict__ = JSON
+
+    return player
+
+
+def playerToJSON(plr: Player) -> str:
+    cmd = plr.__reduce__()
+    res: dict = {key: value for key, value in cmd[2].items()}  # deepcopies the dict to avoid any issues with the player
+
+    for weapon in res['weapons']:
+        weapon.bullets = [bullet.__reduce__()[2] for bullet in weapon.bullets]
+    res['weapons'] = [weapon.__reduce__()[2] for weapon in res['weapons']]
+
+    res['rect'] = str(res['rect']).replace('Rect(', "").replace(")", "")
+    res['healthBar'] = str(res['healthBar']).replace('Rect(', "").replace(")", "")
+    res['redBar'] = str(res['redBar']).replace('Rect(', "").replace(")", "")
+
+    return str(res).replace("'", '"')
 
 
 if __name__ == "__main__":
-    plr = Player(1, 1, 1, Models.JETT, Agents.JETT)
-    test = pickle.dumps(plr)
-    test = pickle.loads(test)
+    import logging
 
-    if test.__vars__() == plr.__vars__():
-        print("worked")
+    logger = logging.getLogger('player')
+    logger = constants.setupLogger(logger)
+
+    newPlayer = Player(3, 0, 1, Agents.Placeholder)
+    JSONPlayer = playerToJSON(newPlayer)
+
+    logger.debug(f"jsonplr: {JSONPlayer}")
+    evenBetterPlayer = JSONToPlayer(JSONPlayer)
+
+    logger.debug(f"newPlayerDICT: {newPlayer.__dict__}")
+    logger.debug(f"evenBetterPlayerDICT: {evenBetterPlayer.__dict__}")
