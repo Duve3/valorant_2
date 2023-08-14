@@ -3,11 +3,10 @@ Test client, it is essentially the game but just stripped down to the client lev
 """
 
 import socket
-import pickle
 import pygame
 from src import constants
-from SERVER.constants import PlayerListSTART, PlayerListEND, PlayerEND, PlayerSTART, DisconnectMSG, DisconnectRES, encoding, setupLogger
-from player import Player
+from SERVER.constants import DisconnectMSG, DisconnectRES, encoding, setupLogger
+from player import Player, JSONToPlayer, playerToJSON
 import logging
 
 logger = logging.getLogger("testclient-0")
@@ -20,7 +19,7 @@ class Client:
         self.server = "127.0.0.1"
         self.port = 5556
         self.addr = (self.server, self.port)
-        self.header = 2048 * 120  # 240 kb of data read.
+        self.header = 1024
         self.client.settimeout(10)
 
         self.p = self.connect()
@@ -31,21 +30,27 @@ class Client:
     def connect(self):
         try:
             self.client.connect(self.addr)
-            data = self.client.recv(self.header)
-            logger.debug("data:", data)  # data will purposely not go into file because it will crash pycharm
-            return pickle.loads(data)
+            data = self.recv()
+            logger.debug(f"data: {data}")  # data will purposely not go into file because it will crash pycharm
+            return JSONToPlayer(data)
         except Exception as e:
             logger.error(e)
             raise e
 
-    def sendPlayerData(self, data):
+    def sendPlayerData(self, plr):
         try:
-            freshData = (data.x, data.y)
-            self.client.send(pickle.dumps(freshData))
+            self.send(playerToJSON(plr))
 
-            dataTuple: tuple = pickle.loads(self.client.recv(self.header))
+            Nplayer = JSONToPlayer(self.recv())
+            NplayerList = []
+            msg = self.recv()
+            logger.debug(f"msg: {msg}")
+            if msg != "[]":
+                for lp in msg.split(","):
+                    logger.debug(f"LP: {lp}")
+                    NplayerList.append(JSONToPlayer(lp))
 
-            return dataTuple[0], dataTuple[1]
+            return Nplayer, NplayerList
 
         except Exception as e:
             logger.error(e)
@@ -53,13 +58,26 @@ class Client:
 
     def disconnect(self):
         try:
-            self.client.send(DisconnectMSG.encode(encoding))
-            res = self.client.recv(self.header)
+            self.send(DisconnectMSG)
+            res = self.recv()
             if res != DisconnectRES.encode(encoding):
                 logger.warning("WARNING: Server did not respond with proper response on disconnect!\nDisconnecting Anyways...")
         except Exception as e:
             logger.error(e)
             raise e
+
+    def send(self, msg):
+        message = msg.encode(encoding)
+        msg_length = len(message)
+        send_length = str(msg_length).encode(encoding)
+        send_length += b' ' * (self.header - len(send_length))
+        self.client.send(send_length)
+        self.client.send(message)
+
+    def recv(self) -> str:
+        length = int(self.client.recv(self.header).decode(encoding))  # if it doesn't int that means something went really wrong so its ok to crash
+
+        return self.client.recv(length).decode(encoding)
 
 
 if __name__ == "__main__":
@@ -95,4 +113,4 @@ if __name__ == "__main__":
 
         pygame.display.flip()
 
-        playerList, player = client.sendPlayerData(player)
+        player, playerList = client.sendPlayerData(player)

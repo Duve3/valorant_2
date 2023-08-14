@@ -16,6 +16,39 @@ class Agents(Enum):
     Placeholder = "PHDR"
 
 
+class Ranks(Enum):
+    Iron1 = "Iron 1"
+    Iron2 = "Iron 2"
+    Iron3 = "Iron 3"
+    Bronze1 = "Bronze 1"
+    Bronze2 = "Bronze 2"
+    Bronze3 = "Bronze 3"
+    Silver1 = "Silver 1"
+    Silver2 = "Silver 2"
+    Silver3 = "Silver 3"
+    Gold1 = "Gold 1"
+    Gold2 = "Gold 2"
+    Gold3 = "Gold 3"
+    Plat1 = "Platinum 1"
+    Plat2 = "Platinum 2"
+    Plat3 = "Platinum 3"
+    Dia1 = "Diamond 1"
+    Dia2 = "Diamond 2"
+    Dia3 = "Diamond 3"
+    Asc1 = "Ascendant 1"
+    Asc2 = "Ascendant 2"
+    Asc3 = "Ascendant 3"
+    Immo1 = "Immortal 1"
+    Immo2 = "Immortal 2"
+    Immo3 = "Immortal 3"
+    Radiant = "Radiant"
+    rankMap = [Iron1, Iron2, Iron3, Bronze1, Bronze2, Bronze3, Silver1, Silver2, Silver3, Gold1, Gold2, Gold3, Plat1, Plat2, Plat3, Dia1, Dia2, Dia3, Asc1, Asc2, Asc3, Immo1, Immo2, Immo3, Radiant]
+
+    @staticmethod
+    def fromValue(value):
+        return Ranks.rankMap.value[value]
+
+
 class Models(Enum):
     JETT = ["JMA", "JMB", "JMC"]
     RAZE = []

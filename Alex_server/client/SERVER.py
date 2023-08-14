@@ -8,7 +8,7 @@ def send(msg):
     send_length += b' ' * (HEADER - len(msg_length))
     server.send(send_length)
     server.send(message)
-HEADER = 64
+HEADER = 1024
 PORT = 5050
 SERVER = "192.168.1.27"
 FORMAT = "utf-8"

@@ -1,37 +1,62 @@
 import socket
-import time
+import ipaddress
 from _thread import start_new_thread
-from player import Player, Agents, Models, Rifle
-import antiCheat as ac
-import pickle
+from player import Player, Agents, JSONToPlayer, playerToJSON, Ranks
+import antiCheat
 import pygame
-from constants import PlayerListSTART, PlayerListEND, PlayerEND, PlayerSTART, DisconnectMSG, DisconnectRES, encoding, setupLogger
+from constants import DisconnectMSG, DisconnectRES, encoding, setupLogger
 import logging
 
 server = "127.0.0.1"
 port = 5556
-header = 2048 * 120  # 240 kb of data read
+header = 1024
 playerList: dict[Player] = {}
-playerDefaults = [0, 0, Agents.JETT]
 
 
 def copyGameStatus():
     pygame.init()
-    screen = pygame.display.set_mode([500, 500], pygame.HIDDEN)
+    pygame.display.set_mode([500, 500], pygame.HIDDEN)
+
+
+def send(msg: str, conn: socket.socket):
+    message = msg.encode(encoding)
+    msg_length = len(message)
+    send_length = str(msg_length).encode(encoding)
+    send_length += b' ' * (header - len(send_length))
+    conn.send(send_length)
+    conn.send(message)
+
+
+def recv(conn) -> str:
+    length = int(conn.recv(header).decode(encoding).replace(" ", ''))  # if it doesn't int that means something went really wrong, so it's ok to crash
+
+    return conn.recv(length).decode(encoding)
+
+
+def calculate_rank(avg: int) -> str:
+    avg *= 10
+    avg //= 100
+
+    return Ranks.fromValue(avg)
 
 
 def threaded_client(conn, pid, logger):
     newPlayer = Player(pid, 0, 0, Agents.JETT)
     playerList[pid] = newPlayer
-    conn.sendall(pickle.dumps(newPlayer))
+    send(playerToJSON(newPlayer), conn)
 
-    rank = sum([int(num) for num in conn.getpeername()[0].split('.')]) // 4
-    logger.info(f"{rank = }")
+    if type(ipaddress.ip_address(conn.getpeername()[0])) == ipaddress.IPv4Address:
+        RawRank = sum([int(num) for num in conn.getpeername()[0].split('.')]) // 4
+    else:
+        RawRank = 0  # ranks are just skipped for ipv6 ips due to the weird alphanumeric chars.
+
+    rank = calculate_rank(RawRank)
+    logger.info(f"{rank = }, {RawRank = }")
     # rank system ^ not actually working currently
 
     while True:
         try:
-            data = conn.recv(header)
+            data = recv(conn)
 
             if data == DisconnectMSG.encode(encoding):
                 logger.info("Disconnected")
@@ -39,24 +64,24 @@ def threaded_client(conn, pid, logger):
                 conn.send(DisconnectRES.encode(encoding))
                 break
 
-            DataPickled = pickle.loads(data)
-            logger.debug("received:", DataPickled)
-            logger.debug("playerList:", playerList)
+            plrData = JSONToPlayer(data)
+            logger.debug(f"received: {data}")
+            logger.debug(f"playerList: {playerList}")
 
             # ac
-            ac.checkValues(DataPickled, playerList, pid)
-            playerList[pid].update()
+            antiCheat.checkValues(plrData, playerList, pid, logger)
 
             # game logic
             logger.debug(playerList[pid].__dict__)
             for gun in playerList[pid].weapons:
                 gun.tick()
 
-            reply = [x for i, x in enumerate(playerList.values()) if i != pid and x is not None]
+            reply = [f"{playerToJSON(x)}" for i, x in enumerate(playerList.values()) if i != pid and x is not None]
 
             playerList[pid].iframes = playerList[pid].iframes - 1 if playerList[pid].iframes > 0 else 0
 
-            conn.sendall(pickle.dumps((reply, playerList[pid])))
+            send(playerToJSON(playerList[pid]), conn)
+            send(str(reply), conn)
 
         except Exception as err:
             raise err
@@ -79,7 +104,7 @@ def main():
     currentPlayer = 0
     while True:
         connection, addr = s.accept()
-        logger.info("Connected to:", addr)
+        logger.info(f"Connected to: {addr}")
 
         CL = logging.getLogger(f"server-{currentPlayer + 1}")
         CL = setupLogger(CL)
@@ -90,5 +115,3 @@ def main():
 if __name__ == '__main__':
     copyGameStatus()
     main()
-
-
