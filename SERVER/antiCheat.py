@@ -1,9 +1,13 @@
+import logging
+from constants import setupLogger
 # SETTINGS
 MAX_X_MOVEMENT_PF = 10
 MAX_Y_MOVEMENT_PF = 10
 
 
-def checkValues(playerData, playerList, pid, logger):
+def checkValues(playerData, playerList, pid):
+    logger = logging.getLogger("server-AC")
+    logger = setupLogger(logger)
     ACR = ""  # anticheat reason
     # movement check
     if abs(playerList[pid].x - playerData.x) > MAX_X_MOVEMENT_PF:  # moved more than ~ units in 1 frame
@@ -19,4 +23,4 @@ def checkValues(playerData, playerList, pid, logger):
         playerList[pid].y = playerData.y  # y
 
     if ACR != "":
-        logger.warning("ANTICHEAT: Triggered on player id:", pid, "with reason:\"", ACR, "\"")
+        logger.warning(f"Triggered on player id: {pid} with reason \"{ACR}\"")

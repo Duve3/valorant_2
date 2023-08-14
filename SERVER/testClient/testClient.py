@@ -46,7 +46,7 @@ class Client:
             msg = self.recv()
             logger.debug(f"msg: {msg}")
             if msg != "[]":
-                for lp in msg.split(","):
+                for lp in msg.splitlines():
                     logger.debug(f"LP: {lp}")
                     NplayerList.append(JSONToPlayer(lp))
 
@@ -60,7 +60,7 @@ class Client:
         try:
             self.send(DisconnectMSG)
             res = self.recv()
-            if res != DisconnectRES.encode(encoding):
+            if res != DisconnectRES:
                 logger.warning("WARNING: Server did not respond with proper response on disconnect!\nDisconnecting Anyways...")
         except Exception as e:
             logger.error(e)
@@ -109,6 +109,7 @@ if __name__ == "__main__":
         player.draw(screen, wireframe=True)
 
         for plr in playerList:
+            logger.debug(f"PID: {plr.id}, pos: ({plr.x}, {plr.y})")
             plr.draw(screen, wireframe=True)
 
         pygame.display.flip()

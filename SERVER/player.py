@@ -175,6 +175,7 @@ class Player:
         self.redBar = pygame.Rect(self.x, self.y + 100, 50, 5)
 
     def draw(self, display: pygame.Surface, wireframe: bool = False):
+        self.__update()
         if wireframe:
             pygame.draw.rect(display, constants.blue, self.rect, width=5)
         else:
@@ -221,7 +222,6 @@ class Player:
 
         self.__handleMovement(keys)
 
-        self.__update()
 
     def __vars__(self):
         return vars(self)

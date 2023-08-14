@@ -58,10 +58,10 @@ def threaded_client(conn, pid, logger):
         try:
             data = recv(conn)
 
-            if data == DisconnectMSG.encode(encoding):
+            if data == DisconnectMSG:
                 logger.info("Disconnected")
                 del playerList[pid]
-                conn.send(DisconnectRES.encode(encoding))
+                send(DisconnectRES, conn)
                 break
 
             plrData = JSONToPlayer(data)
@@ -69,14 +69,17 @@ def threaded_client(conn, pid, logger):
             logger.debug(f"playerList: {playerList}")
 
             # ac
-            antiCheat.checkValues(plrData, playerList, pid, logger)
+            antiCheat.checkValues(plrData, playerList, pid)
 
             # game logic
             logger.debug(playerList[pid].__dict__)
             for gun in playerList[pid].weapons:
                 gun.tick()
 
-            reply = [f"{playerToJSON(x)}" for i, x in enumerate(playerList.values()) if i != pid and x is not None]
+            reply = ""
+            for i, x in enumerate(playerList.values()):
+                if i != pid and x is not None:
+                    reply += f"{playerToJSON(x)}\n"
 
             playerList[pid].iframes = playerList[pid].iframes - 1 if playerList[pid].iframes > 0 else 0
 
@@ -91,8 +94,9 @@ def threaded_client(conn, pid, logger):
 
 
 def main():
+    OverAllListeningLevel = logging.DEBUG
     logger = logging.getLogger("server-0")
-    logger = setupLogger(logger)
+    logger = setupLogger(logger, level=OverAllListeningLevel)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -107,7 +111,7 @@ def main():
         logger.info(f"Connected to: {addr}")
 
         CL = logging.getLogger(f"server-{currentPlayer + 1}")
-        CL = setupLogger(CL)
+        CL = setupLogger(CL, level=OverAllListeningLevel)
         start_new_thread(threaded_client, (connection, currentPlayer, CL))
         currentPlayer += 1
 
