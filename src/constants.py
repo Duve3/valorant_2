@@ -1,4 +1,5 @@
 from pygame import Color
+import logging
 
 
 class __CustomColor(Color):
@@ -42,3 +43,21 @@ CustomRed = __CustomColor((255, 70, 82))
 colorList = [white, black, red, grayRed, green, grayGreen, blue, gray, whiteGray, yellow, orange]
 
 courierFont = "CourierPrimeCode-Regular.ttf"
+
+
+def setupLogger(logger: logging.Logger, level: int = logging.DEBUG):
+    logFormatter = logging.Formatter(
+        "%(levelname)s (%(asctime)s) - %(name)s: %(message)s (Line: %(lineno)d [%(filename)s])",
+        "%m/%d %H:%M:%S")
+
+    fileHandler = logging.FileHandler("{0}/{1}.log".format("./logs", "console"))
+    fileHandler.setFormatter(logFormatter)
+
+    consoleHandler = logging.StreamHandler()
+    consoleHandler.setFormatter(logFormatter)
+
+    logger.level = level
+    logger.addHandler(fileHandler)
+    logger.addHandler(consoleHandler)
+
+    return logger
