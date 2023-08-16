@@ -16,8 +16,8 @@ logger = setupLogger(logger)
 class Client:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "127.0.0.1"
-        self.port = 5556
+        self.server = "8.tcp.us-cal-1.ngrok.io"
+        self.port = 108
         self.addr = (self.server, self.port)
         self.header = 1024
         self.client.settimeout(10)
@@ -76,7 +76,7 @@ class Client:
 
     def recv(self) -> str:
         length = int(self.client.recv(self.header).decode(encoding))  # if it doesn't int that means something went really wrong so its ok to crash
-
+        logger.debug(f"received byte length of {length}")
         return self.client.recv(length).decode(encoding)
 
 

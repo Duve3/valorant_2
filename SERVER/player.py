@@ -46,7 +46,10 @@ class Ranks(Enum):
 
     @staticmethod
     def fromValue(value):
-        return Ranks.rankMap.value[value]
+        try:
+            return Ranks.rankMap.value[value]
+        except ValueError:
+            return Ranks.Radiant
 
 
 class Models(Enum):

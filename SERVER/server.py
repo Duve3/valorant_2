@@ -8,7 +8,7 @@ from constants import DisconnectMSG, DisconnectRES, encoding, setupLogger
 import logging
 
 server = "127.0.0.1"
-port = 5556
+port = 5555
 header = 1024
 playerList: dict[Player] = {}
 
