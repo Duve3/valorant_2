@@ -4,9 +4,8 @@ Test client, it is essentially the game but just stripped down to the client lev
 
 import socket
 import pygame
-from src import constants
-from SERVER.constants import DisconnectMSG, DisconnectRES, encoding, setupLogger
 from player import Player, JSONToPlayer, playerToJSON
+from constants import setupLogger, DisconnectMSG, DisconnectRES, encoding
 import logging
 
 logger = logging.getLogger("testclient-0")
@@ -16,7 +15,7 @@ logger = setupLogger(logger)
 class Client:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "8.tcp.us-cal-1.ngrok.io"
+        self.server = "127.0.0.1"
         self.port = 108
         self.addr = (self.server, self.port)
         self.header = 1024
@@ -104,7 +103,7 @@ if __name__ == "__main__":
         player.hookEvents(events)
 
         # rendering
-        screen.fill(constants.white)
+        screen.fill("white")
 
         player.draw(screen, wireframe=True)
 

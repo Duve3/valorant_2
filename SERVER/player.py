@@ -1,9 +1,11 @@
-# this is here because I want type hints but do not want to import pygame
+"""
+abcdefghijk
+"""
 import math
 from enum import Enum
 import json
 import pygame
-from src import constants
+import constants
 
 
 class Agents(Enum):

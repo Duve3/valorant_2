@@ -1,14 +1,18 @@
 import pygame
+import pygame_wrapper as pgw
 from main_menu import MainMenu
 from disclaimer_menu import DisclaimerMenu
 import ctypes
 import sys
+import os
 
 
 def main(prod: bool = False):  # the main game
     # setting the logo for the game
     myappid = u'alterra.games.valorant2d.testing'  # arbitrary string
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    if os.name != "posix":
+        # might say "code is unreachable" because your not on windows, as this only works on windows
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid) 
 
     pygame.init()
     if not getattr(pygame, "IS_CE", False):
@@ -18,7 +22,16 @@ def main(prod: bool = False):  # the main game
             print("For safety reasons the game will now close")
             sys.exit()
         else:
-            print("The game will not close due to this not be a PROD environment")
+            print("The game will not close, not prod environment")
+    
+    if not getattr(pgw, "GameType", False):
+        print("dude why are you emulating pgw?")
+        if prod:
+            print("closing game because pgw is a required asset")
+            sys.exit()
+        else:
+            print("yeah im not closing it but my guy why are you running debugging mode and emulating it???")
+
 
     RES = [1280, 720]
     ico = pygame.image.load('../assets/V2DLOGOv2.png')

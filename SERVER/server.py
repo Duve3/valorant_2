@@ -99,8 +99,13 @@ def main():
     logger = setupLogger(logger, level=OverAllListeningLevel)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    s.bind((server, port))
+    
+    try:
+        s.bind((server, port))
+    except OSError:
+        logger.error(f"Failed binding to {server}:{port}.")
+        logger.info("Reattempting binding to a port 1 higher!")
+        s.bind((server, port + 1))
 
     s.listen()
     logger.info("Waiting for connection")
