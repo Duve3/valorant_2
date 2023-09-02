@@ -1,33 +1,33 @@
 import pygame
 import constants
+import pygame_wrapper as pgw
+import logging
+from pygame_wrapper import Font, MenuType
 from util import createFont, UIPopup, InputField
 import sys
 
 
-class MainMenu:
+class MainMenu(MenuType):
     """
     Main Menu
     """
 
-    def __init__(self, window: pygame.Surface, fpsClock: pygame.time.Clock, width: int, height: int):
-        self.res = (width, height)
-        self.display: pygame.Surface = window
-        self.fpsClock: pygame.time.Clock = fpsClock
+    def __init__(self, window: pygame.Surface, fpsClock: pygame.time.Clock, logger: logging.Logger):
+        super().__init__(window, fpsClock)
 
         # LOADING SCREEN:
         self.loadingImage = pygame.image.load("../assets/valorantLoading.png").convert_alpha()
         self.loadingImageALPHA = self.loadingImage.get_alpha()
         self.userInput = False
-        self.FONTwaitingForUserInput = createFont(constants.white, 40,
-                                                  fontLocation="../assets/CourierPrimeCode-Regular.ttf")
+        self.FONTwaitingForUserInput = Font("../assets/CourierPrimeCode-Regular.ttf", 40, constants.white)
         self.waitingUIRect = None
 
         # MAIN MENU
-        self.FONTtopText = createFont(constants.white, 60, fontLocation="../assets/MonomaniacOne-Regular.ttf")
+        self.FONTtopText = Font("../assets/MonomaniacOne-Regular.ttf", 60, constants.white)
         self.playSize = 60
         self.playRect = None
         self.PolygonPlayPOINTS = [[0, 0], [50, 80], [250, 80], [300, 0]]
-        self.PlayPolygonOffset = (self.display.get_rect().centerx - self.PolygonPlayPOINTS[len(self.PolygonPlayPOINTS) - 1][0] / 2, 0)
+        self.PlayPolygonOffset = (self.screen.get_rect().centerx - self.PolygonPlayPOINTS[len(self.PolygonPlayPOINTS) - 1][0] / 2, 0)
         for point in self.PolygonPlayPOINTS:
             point[0] += self.PlayPolygonOffset[0]
             point[1] += self.PlayPolygonOffset[1]
@@ -38,7 +38,7 @@ class MainMenu:
 
         # PLAY MENU
         self.joinRect = None
-        self.FONTjoinButton = createFont(constants.white, 40, fontLocation="../assets/CourierPrimeCode-Regular.ttf")
+        self.FONTjoinButton = Font("../assets/CourierPrimeCode-Regular.ttf", 40, constants.white)
         self.joinColorRect = constants.CustomRed
         self.joinColor = constants.white
         self.joinText = "JOIN"
@@ -48,7 +48,7 @@ class MainMenu:
         self.joinPady = 20
         self.customJoinRect = None
         self.joining = False
-        self.InfoPopup = JoinPopup((self.display.get_rect().centerx - 300, 200), (600, 300))
+        self.InfoPopup = JoinPopup((self.screen.get_rect().centerx - 300, 200), (600, 300))
 
     def run(self):
         while True:
@@ -107,12 +107,12 @@ class MainMenu:
                     self.loadingImage.set_alpha(self.loadingImageALPHA)
             else:
                 self.waitingUIRect = self.FONTwaitingForUserInput.get_rect("Click anywhere to begin", size=40)
-                self.waitingUIRect.centerx = self.display.get_rect().centerx
+                self.waitingUIRect.centerx = self.screen.get_rect().centerx
                 self.waitingUIRect.y = 650
 
             if self.userInput:
                 self.playRect = self.FONTtopText.get_rect("PLAY", size=self.playSize)
-                self.playRect.centerx = self.display.get_rect().centerx
+                self.playRect.centerx = self.screen.get_rect().centerx
                 self.playRect.y = 20
 
             if self.inPlay:
@@ -120,44 +120,44 @@ class MainMenu:
                 self.PlayPolygonColor = constants.gray
                 self.playSize = 70
                 self.playRect = self.FONTtopText.get_rect("PLAY", size=self.playSize)
-                self.playRect.centerx = self.display.get_rect().centerx
+                self.playRect.centerx = self.screen.get_rect().centerx
                 self.playRect.y = 20
 
                 self.joinRect = self.FONTjoinButton.get_rect(self.joinText, size=40)
-                self.joinRect.centerx = self.display.get_rect().centerx
+                self.joinRect.centerx = self.screen.get_rect().centerx
                 self.joinRect.y = 650
 
             # RENDERING
             if self.userInput and self.loadingImageALPHA < 1:
-                self.display.fill(constants.black)
+                self.screen.fill(constants.black)
             else:
-                self.display.fill(constants.logoColor)
+                self.screen.fill(constants.logoColor)
 
             if self.inPlay:
-                self.display.fill(constants.logoColor)
+                self.screen.fill(constants.logoColor)
 
             loadingImgRect = self.loadingImage.get_rect()
-            loadingImgRect.centerx = self.display.get_rect().centerx
-            self.display.blit(self.loadingImage, loadingImgRect)
+            loadingImgRect.centerx = self.screen.get_rect().centerx
+            self.screen.blit(self.loadingImage, loadingImgRect)
 
             if not self.userInput:
-                self.FONTwaitingForUserInput.render_to(self.display, self.waitingUIRect, "Click anywhere to begin")
+                self.FONTwaitingForUserInput.render_to(self.screen, self.waitingUIRect, "Click anywhere to begin")
 
             if self.userInput:
-                pygame.draw.polygon(self.display, self.PlayPolygonColor, self.PolygonPlayPOINTS)
-                self.FONTtopText.render_to(self.display, self.playRect, "PLAY", fgcolor=self.playColor,
+                pygame.draw.polygon(self.screen, self.PlayPolygonColor, self.PolygonPlayPOINTS)
+                self.FONTtopText.render_to(self.screen, self.playRect, "PLAY", fgcolor=self.playColor,
                                            size=self.playSize)
 
                 if self.inPlay:
-                    self.InfoPopup.draw(screen=self.display, redrawElements=True)
+                    self.InfoPopup.draw(screen=self.screen, redrawElements=True)
                     if not self.joining:
                         self.customJoinRect = pygame.Rect(self.joinRect.x - self.joinPadx,
                                                           self.joinRect.y - self.joinPady,
                                                           self.joinRect.width + self.joinPadw,
                                                           self.joinRect.height + self.joinPadh)
 
-                    pygame.draw.rect(self.display, self.joinColorRect, self.customJoinRect)
-                    self.FONTjoinButton.render_to(self.display, self.joinRect, self.joinText, fgcolor=self.joinColor,
+                    pygame.draw.rect(self.screen, self.joinColorRect, self.customJoinRect)
+                    self.FONTjoinButton.render_to(self.screen, self.joinRect, self.joinText, fgcolor=self.joinColor,
                                                   size=40)
 
             pygame.display.flip()

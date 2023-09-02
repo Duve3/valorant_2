@@ -1,53 +1,10 @@
 from builtins import function
 
 import pygame.freetype
-from _common import RGBAOutput, ColorValue, RectValue, Coordinate, FontValue
+from pygame._common import RGBAOutput, ColorValue, RectValue, Coordinate, FontValue
 from typing import Union, Tuple, Sequence, Optional, Iterable
 from pygame import Color, Surface, Rect
 from enum import Enum
-
-
-STYLE_DEFAULT: int
-
-
-class BetterFont(pygame.freetype.Font):
-    ColorList: list[Union[Color, int, str, Tuple[int, int, int]]] | None
-    def __init__(self,
-                 fgColor: Union[Color, int, str, Tuple[int, int, int], RGBAOutput, Sequence[int]],
-                 fontSize: Union[float, Tuple[float, float]],
-                 location: str,
-                 font_index: int = 0,
-                 resolution: int = 0,
-                 ucs4: int = False,
-                 ColorList: list[Union[Color, int, str, Tuple[int, int, int], RGBAOutput, Sequence[int]]] = None) -> None: ...
-
-    def multiline_render_to(self,
-                            surf: Surface,
-                            dest: RectValue,
-                            text: str,
-                            fgcolor: Optional[ColorValue] = None,
-                            bgcolor: Optional[ColorValue] = None,
-                            style: int = STYLE_DEFAULT,
-                            rotation: int = 0,
-                            size: float = 0) -> list[pygame.rect.Rect]: ...
-
-    def multiline_render(self,
-                         text: str,
-                         fgcolor: Optional[ColorValue] = None,
-                         bgcolor: Optional[ColorValue] = None,
-                         style: int = STYLE_DEFAULT,
-                         rotation: int = 0,
-                         size: float = 0,) -> list[Tuple[Surface, pygame.rect.Rect]]: ...
-
-    def get_center(self,
-                   surf: Surface,
-                   text: str,
-                   style: int = STYLE_DEFAULT,
-                   rotation: int = 0,
-                   size: float = 0,
-                   x: bool = True,
-                   y: bool = False) -> pygame.rect.Rect: ...
-
 
 class InputField:
     x: Union[float, int]
@@ -132,37 +89,6 @@ class MenuResponses(Enum):
     EnterPCMMenu = 2
     EnterMainMenu = 3
     EnterExecuteMenu = 4
-
-class FileSelector:
-    FileLocationOutline: pygame.Rect
-    FONT_FileLocation: pygame.freetype.Font
-    FileButton: Button
-    FONT_FileToParse: pygame.freetype.Font
-    directoryToFile: str
-    Title: str
-    RectColor: ColorValue
-    def __init__(self,
-                 Pos: Coordinate,
-                 Width: float,
-                 FontColor: ColorValue,
-                 RectColor: ColorValue,
-                 ButtonSize: float,
-                 ButtonActiveColor: ColorValue,
-                 ButtonInactiveColor: ColorValue,
-                 TitleText: str,
-                 ButtonWidth: int = 0,
-                 rounding: int = 0,
-                 FontLocation: str = "./assets/CourierPrimeCode-Regular.ttf"): ...
-
-    def render_to(self,
-                  display: pygame.Surface): ...
-
-    def handle_events(self,
-                      events: list[pygame.event],
-                      HandleTrigger: bool = True,
-                      CustomFunc: function = None,
-                      FileTypes: list[tuple[str, str]] = None) -> bool | None: ...
-
 
 class UIPopup:
     x: int

@@ -1,24 +1,24 @@
 import pygame
+import pygame_wrapper as pgw
+from pygame_wrapper import Font
+import logging
 import constants
-from util import createFont, InputField, BetterFont
 import sys
 
 
-class DisclaimerMenu:
+class DisclaimerMenu(pgw.MenuType):
     """
     Disclaimer Menu
     """
 
-    def __init__(self, window: pygame.Surface, fpsClock: pygame.time.Clock, width: int, height: int):
-        self.res = (width, height)
-        self.screen: pygame.Surface = window
-        self.fpsClock: pygame.time.Clock = fpsClock
+    def __init__(self, window: pygame.Surface, fpsClock: pygame.time.Clock, logger: logging.Logger):
+        super().__init__(window, fpsClock)
 
         self.userInput = False
         with open("disclaimer.txt", "r") as df:
             self.TEXT_Disclaimer = df.read()
-        self.FONT_Disclaimer = BetterFont(constants.white, 20, "../assets/CourierPrimeCode-Regular.ttf")
-        self.FONT_Top = BetterFont(constants.white, 40, "../assets/MonomaniacOne-Regular.ttf")
+        self.FONT_Disclaimer = Font("../assets/CourierPrimeCode-Regular.ttf", 20, constants.white)
+        self.FONT_Top = Font("../assets/MonomaniacOne-Regular.ttf", 40, constants.white)
 
     def run(self):
         while True:

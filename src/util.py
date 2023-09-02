@@ -17,8 +17,6 @@ Coordinate = Union[Tuple[float, float], Sequence[float], Vector2]
 RGBAOutput = Tuple[int, int, int, int]
 ColorValue = Union[Color, int, str, Tuple[int, int, int], RGBAOutput, Sequence[int]]
 
-STYLE_DEFAULT = pygame.freetype.STYLE_DEFAULT
-
 
 def createFont(color: Union[pygame.Color, int, str, Tuple[int, int, int], RGBAOutput, Sequence[int]], size: Union[float, Tuple[float, float]], fontLocation: str):
     """
@@ -32,47 +30,6 @@ def createFont(color: Union[pygame.Color, int, str, Tuple[int, int, int], RGBAOu
     font = pygame.freetype.Font(fontLocation, size=size)
     font.fgcolor = color
     return font
-
-
-# Btw if something isn't type checked (doesn't have the arg: thing) its probably in the util.pyi file.
-# This is because of some type checking things not working in normal python files and must be put in pyi files.
-class BetterFont(pygame.freetype.Font):
-    def __init__(self, fgColor: Union[Color, int, str, Tuple[int, int, int], RGBAOutput, Sequence[int]], fontSize: Union[float, Tuple[float, float]], location: str, font_index: int = 0, resolution: int = 0, ucs4: int = False, ColorList: list[Union[Color, int, str, Tuple[int, int, int], RGBAOutput, Sequence[int]]] = None):
-        super().__init__(location, size=fontSize, font_index=font_index, resolution=resolution, ucs4=ucs4)
-        self.fgcolor = fgColor
-        self.ColorList = ColorList
-
-    def multiline_render_to(self, surf: Surface, dest, text: str, fgcolor: Optional[ColorValue] = None, bgcolor: Optional[ColorValue] = None, style: int = STYLE_DEFAULT, rotation: int = 0, size: float = 0) -> list[pygame.rect.Rect]:
-        ListText = text.splitlines()
-        ListRects = []
-        useColorList = True if self.ColorList is not None else False
-        for i, line in enumerate(ListText):
-            if useColorList:
-                self.fgcolor = self.ColorList[i % len(self.ColorList)]
-            rect = self.render_to(surf=surf, dest=(dest[0], dest[1] + (i * self.size + 10)), text=line, fgcolor=fgcolor, bgcolor=bgcolor, style=style, rotation=rotation, size=size)
-            ListRects.append(rect)
-
-        return ListRects
-
-    # probably works IDK
-    def multiline_render(self, text: str, fgcolor: Optional[ColorValue] = None, bgcolor: Optional[ColorValue] = None, style: int = STYLE_DEFAULT, rotation: int = 0, size: float = 0) -> list[Tuple[Surface, pygame.rect.Rect]]:
-        ListText = text.splitlines()
-        ListSurfs = []
-        for i, line in enumerate(ListText):
-            surfRect = self.render(text=line, fgcolor=fgcolor, bgcolor=bgcolor, style=style, rotation=rotation, size=size)
-            ListSurfs.append(surfRect)
-
-        return ListSurfs
-
-    def get_center(self, surf: Surface, text: str, style: int = STYLE_DEFAULT, rotation: int = 0, size: float = 0, x: bool = True, y: bool = False) -> pygame.rect.Rect:
-        rect = self.get_rect(text=text, style=style, rotation=rotation, size=size)
-        if x:
-            rect.centerx = surf.get_rect().centerx
-
-        if y:
-            rect.centery = surf.get_rect().centery
-
-        return rect
 
 
 class InputField:
