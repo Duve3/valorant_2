@@ -164,8 +164,10 @@ class Player:
         self.id = pid
         self.x = x
         self.vx = 0
+        self.ax = 0
         self.y = y
         self.vy = 0
+        self.ay = 0
         self.width = 50
         self.height = 100
         self.agent = agent.value
@@ -178,6 +180,8 @@ class Player:
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.healthBar = pygame.Rect(self.x, self.y + 100, self.health // 2, 5)
         self.redBar = pygame.Rect(self.x, self.y + 100, 50, 5)
+        self.maxSpeed = 10
+        self.startSpeed = 5
 
     def draw(self, display: pygame.Surface, wireframe: bool = False):
         self.__update()
@@ -195,6 +199,10 @@ class Player:
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.healthBar = pygame.Rect(self.x, self.y + 110, self.health // 2, 5)
         self.redBar = pygame.Rect(self.x, self.y + 110, 50, 5)
+
+    @staticmethod
+    def decay(var):
+        return var - 1 if var > 0 else 0
 
     def __handleMovement(self, keys):
         # key handling
@@ -215,8 +223,8 @@ class Player:
         self.y += self.vy
 
         # velo decay
-        self.vy = self.vy - 1 if self.vy > 0 else 0
-        self.vx = self.vx - 1 if self.vx > 0 else 0
+        self.vy = self.decay(self.vy)
+        self.vx = self.decay(self.vx)
 
     def hookEvents(self, events):
         for event in events:
@@ -226,7 +234,6 @@ class Player:
         keys = pygame.key.get_pressed()
 
         self.__handleMovement(keys)
-
 
     def __vars__(self):
         return vars(self)
